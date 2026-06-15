@@ -1,0 +1,302 @@
+{
+  "siteSettings": {
+    "siteName": "Alliance Master Series",
+    "defaultTitle": "Alliance Master Series",
+    "defaultDescription": "A structured competitive alliance league for Supremacy: World War 3.",
+    "contactLabel": "Marc1809",
+    "contactUrl": "https://discord.gg/Ssz3z7vvcB",
+    "footerText": "Season One - June 2026 - Supremacy: World War 3",
+    "logoText": "AMS",
+    "logoSubtext": "Alliance Master Series"
+  },
+  "themes": [
+    {
+      "id": "theme-global-default",
+      "scope": "global",
+      "name": "AMS Global Default",
+      "tokens": {
+        "colorBg": "#050B16",
+        "colorBgSoft": "#071120",
+        "colorPanel": "rgba(12, 28, 60, 0.48)",
+        "colorPanelStrong": "rgba(8, 20, 48, 0.78)",
+        "colorText": "#F4F7FB",
+        "colorTextMuted": "#7D91AD",
+        "colorTextSoft": "#B9C7DC",
+        "colorAccent": "#C9A84C",
+        "colorAccentStrong": "#AA8730",
+        "colorBorder": "rgba(201, 168, 76, 0.20)",
+        "colorSuccess": "#4EB36A",
+        "colorDanger": "#E05C5C",
+        "fontDisplay": "Georgia, 'Times New Roman', serif",
+        "fontBody": "Arial, Helvetica, sans-serif",
+        "radiusCard": "4px",
+        "radiusButton": "2px",
+        "shadowPanel": "0 24px 80px rgba(0, 0, 0, 0.28)",
+        "buttonTransform": "uppercase",
+        "backgroundTexture": "grid"
+      }
+    },
+    {
+      "id": "theme-season-one",
+      "scope": "season",
+      "seasonId": "season-one",
+      "name": "Season One Blue Gold",
+      "tokens": {
+        "colorBg": "#050B16",
+        "colorBgSoft": "#071120",
+        "colorPanel": "rgba(12, 28, 60, 0.48)",
+        "colorPanelStrong": "rgba(8, 20, 48, 0.78)",
+        "colorText": "#F4F7FB",
+        "colorTextMuted": "#7D91AD",
+        "colorTextSoft": "#B9C7DC",
+        "colorAccent": "#C9A84C",
+        "colorAccentStrong": "#AA8730",
+        "colorBorder": "rgba(201, 168, 76, 0.20)",
+        "colorSuccess": "#4EB36A",
+        "colorDanger": "#E05C5C",
+        "fontDisplay": "Georgia, 'Times New Roman', serif",
+        "fontBody": "Arial, Helvetica, sans-serif",
+        "radiusCard": "4px",
+        "radiusButton": "2px",
+        "shadowPanel": "0 24px 80px rgba(0, 0, 0, 0.28)",
+        "buttonTransform": "uppercase",
+        "backgroundTexture": "grid"
+      }
+    }
+  ],
+  "seasons": [
+    {
+      "id": "season-one",
+      "name": "Season One",
+      "slug": "season-one",
+      "status": "active",
+      "themeId": "theme-season-one",
+      "launchLabel": "June 2026",
+      "mapName": "Antarctica 4x Alliance Map",
+      "matchFormat": "6 vs 6",
+      "minTeams": 16,
+      "summary": "The Alliance Master Series is the most structured, prestigious, and competitive alliance league ever organised for Supremacy: World War 3."
+    }
+  ],
+  "navigationItems": [
+    { "id": "nav-home", "label": "Home", "href": "/", "scope": "global", "sortOrder": 1, "isVisible": true },
+    { "id": "nav-seasons", "label": "Seasons", "href": "/seasons", "scope": "global", "sortOrder": 2, "isVisible": true },
+    { "id": "nav-teams", "label": "Teams", "href": "/seasons/season-one/teams", "scope": "global", "sortOrder": 3, "isVisible": true },
+    { "id": "nav-schedule", "label": "Schedule", "href": "/seasons/season-one/schedule", "scope": "global", "sortOrder": 4, "isVisible": true },
+    { "id": "nav-bracket", "label": "Bracket", "href": "/seasons/season-one/bracket", "scope": "global", "sortOrder": 5, "isVisible": true },
+    { "id": "nav-news", "label": "News", "href": "/seasons/season-one/news", "scope": "global", "sortOrder": 6, "isVisible": true }
+  ],
+  "routes": [
+    { "id": "route-home", "path": "/", "status": "published", "targetType": "page", "targetId": "page-home" },
+    { "id": "route-seasons", "path": "/seasons", "status": "published", "targetType": "page", "targetId": "page-seasons" },
+    { "id": "route-season-home", "path": "/seasons/season-one", "status": "published", "targetType": "page", "targetId": "page-season-one-overview" },
+    { "id": "route-season-teams", "path": "/seasons/season-one/teams", "status": "published", "targetType": "page", "targetId": "page-season-one-teams" },
+    { "id": "route-season-schedule", "path": "/seasons/season-one/schedule", "status": "published", "targetType": "page", "targetId": "page-season-one-schedule" },
+    { "id": "route-season-bracket", "path": "/seasons/season-one/bracket", "status": "published", "targetType": "page", "targetId": "page-season-one-bracket" },
+    { "id": "route-season-rules", "path": "/seasons/season-one/rules", "status": "published", "targetType": "page", "targetId": "page-season-one-rules" },
+    { "id": "route-season-news", "path": "/seasons/season-one/news", "status": "published", "targetType": "page", "targetId": "page-season-one-news" },
+    { "id": "route-sponsors", "path": "/sponsors", "status": "published", "targetType": "page", "targetId": "page-sponsors" },
+    { "id": "route-contact", "path": "/contact", "status": "published", "targetType": "page", "targetId": "page-contact" },
+    { "id": "route-news-registration", "path": "/news/season-one-registration-open", "status": "published", "targetType": "page", "targetId": "page-news-registration" }
+  ],
+  "pages": [
+    {
+      "id": "page-home",
+      "title": "Home",
+      "slug": "home",
+      "status": "published",
+      "scope": "global",
+      "seasonId": "season-one",
+      "seoTitle": "Alliance Master Series",
+      "seoDescription": "Where alliances become legends.",
+      "blocks": [
+        { "id": "home-announcement", "type": "announcement", "sortOrder": 1, "content": { "text": "Season One is now open for registration. Minimum 16 teams required to commence. Contact Marc1809 on Discord." } },
+        { "id": "home-hero", "type": "hero", "sortOrder": 2, "content": { "kicker": "Season One - June 2026", "title": "Where Alliances Become Legends.", "body": "The Alliance Master Series is the most structured, prestigious, and competitive alliance league ever organised for Supremacy: World War 3.", "primaryLabel": "View Teams", "primaryHref": "/seasons/season-one/teams", "secondaryLabel": "Open Bracket", "secondaryHref": "/seasons/season-one/bracket" } },
+        { "id": "home-stats", "type": "stat_cards", "sortOrder": 3, "content": { "items": [ { "label": "Teams registered", "value": "5 / 16" }, { "label": "Map", "value": "Antarctica 4x Alliance Map" }, { "label": "Format", "value": "6 vs 6" }, { "label": "Launch", "value": "June 2026" } ] } },
+        { "id": "home-text", "type": "text", "sortOrder": 4, "content": { "kicker": "Competition model", "title": "A season-owned league ecosystem", "body": "Each AMS season can carry its own rules, teams, schedule, bracket, statistics, news, sponsors, media, navigation and design tokens." } },
+        { "id": "home-matches", "type": "match_list", "sortOrder": 5, "content": { "title": "Next Matches", "seasonId": "season-one", "limit": 3 } },
+        { "id": "home-teams", "type": "team_list", "sortOrder": 6, "content": { "title": "Confirmed Alliances", "seasonId": "season-one", "limit": 5 } },
+        { "id": "home-bracket", "type": "bracket_embed", "sortOrder": 7, "content": { "title": "Tournament Path", "tournamentId": "tournament-season-one-main" } },
+        { "id": "home-sponsors", "type": "sponsor_strip", "sortOrder": 8, "content": { "title": "Sponsors", "seasonId": "season-one" } }
+      ]
+    },
+    {
+      "id": "page-seasons",
+      "title": "Seasons",
+      "slug": "seasons",
+      "status": "published",
+      "scope": "global",
+      "blocks": [
+        { "id": "seasons-hero", "type": "hero", "sortOrder": 1, "content": { "kicker": "Competition Archive", "title": "Seasons", "body": "Browse active and archived AMS seasons. Every season is an independent package with its own theme, pages, teams, matches and media." } },
+        { "id": "seasons-list", "type": "season_list", "sortOrder": 2, "content": { "title": "Available Seasons" } }
+      ]
+    },
+    {
+      "id": "page-season-one-overview",
+      "title": "Season One",
+      "slug": "season-one",
+      "status": "published",
+      "scope": "season",
+      "seasonId": "season-one",
+      "blocks": [
+        { "id": "s1-hero", "type": "hero", "sortOrder": 1, "content": { "kicker": "Active Season", "title": "Season One", "body": "Season One launches the Alliance Master Series with structured league play, official governance and a playoff bracket." } },
+        { "id": "s1-teams", "type": "team_list", "sortOrder": 2, "content": { "title": "Teams", "seasonId": "season-one" } },
+        { "id": "s1-matches", "type": "match_list", "sortOrder": 3, "content": { "title": "Schedule", "seasonId": "season-one" } }
+      ]
+    },
+    {
+      "id": "page-season-one-teams",
+      "title": "Season One Teams",
+      "slug": "teams",
+      "status": "published",
+      "scope": "season",
+      "seasonId": "season-one",
+      "blocks": [
+        { "id": "teams-hero", "type": "hero", "sortOrder": 1, "content": { "kicker": "Season One Roster", "title": "Participating Teams", "body": "Each team profile can include a logo, players, statistics, match history, achievements and social links." } },
+        { "id": "teams-list", "type": "team_list", "sortOrder": 2, "content": { "seasonId": "season-one" } }
+      ]
+    },
+    {
+      "id": "page-season-one-schedule",
+      "title": "Season One Schedule",
+      "slug": "schedule",
+      "status": "published",
+      "scope": "season",
+      "seasonId": "season-one",
+      "blocks": [
+        { "id": "schedule-hero", "type": "hero", "sortOrder": 1, "content": { "kicker": "Match Calendar", "title": "Schedule", "body": "Match dates, status, streams, VODs, results and reports are managed per season." } },
+        { "id": "schedule-list", "type": "match_list", "sortOrder": 2, "content": { "seasonId": "season-one" } }
+      ]
+    },
+    {
+      "id": "page-season-one-bracket",
+      "title": "Season One Bracket",
+      "slug": "bracket",
+      "status": "published",
+      "scope": "season",
+      "seasonId": "season-one",
+      "blocks": [
+        { "id": "bracket-hero", "type": "hero", "sortOrder": 1, "content": { "kicker": "Tournament Tree", "title": "Bracket", "body": "The bracket is stored as matches, participants, scores and advancement edges rather than static visuals." } },
+        { "id": "bracket-view", "type": "bracket_embed", "sortOrder": 2, "content": { "tournamentId": "tournament-season-one-main" } }
+      ]
+    },
+    {
+      "id": "page-season-one-rules",
+      "title": "Season One Rules",
+      "slug": "rules",
+      "status": "published",
+      "scope": "season",
+      "seasonId": "season-one",
+      "blocks": [
+        { "id": "rules-hero", "type": "hero", "sortOrder": 1, "content": { "kicker": "Rulebook", "title": "Rules", "body": "Rules can be edited, versioned, archived and optionally linked to a PDF." } },
+        { "id": "rules-block", "type": "rules_block", "sortOrder": 2, "content": { "rulesetId": "rules-season-one" } }
+      ]
+    },
+    {
+      "id": "page-season-one-news",
+      "title": "Season One News",
+      "slug": "news",
+      "status": "published",
+      "scope": "season",
+      "seasonId": "season-one",
+      "blocks": [
+        { "id": "news-hero", "type": "hero", "sortOrder": 1, "content": { "kicker": "CMS", "title": "News", "body": "News can be drafted, scheduled, categorized and optimized for SEO." } },
+        { "id": "news-list", "type": "news_list", "sortOrder": 2, "content": { "seasonId": "season-one" } }
+      ]
+    },
+    {
+      "id": "page-sponsors",
+      "title": "Sponsors",
+      "slug": "sponsors",
+      "status": "published",
+      "scope": "global",
+      "seasonId": "season-one",
+      "blocks": [
+        { "id": "sponsors-hero", "type": "hero", "sortOrder": 1, "content": { "kicker": "Partners", "title": "Sponsors", "body": "Global and season-specific sponsors can be managed from the admin panel." } },
+        { "id": "sponsors-strip", "type": "sponsor_strip", "sortOrder": 2, "content": { "seasonId": "season-one" } }
+      ]
+    },
+    {
+      "id": "page-contact",
+      "title": "Contact",
+      "slug": "contact",
+      "status": "published",
+      "scope": "global",
+      "blocks": [
+        { "id": "contact-hero", "type": "hero", "sortOrder": 1, "content": { "kicker": "Get in touch", "title": "Contact", "body": "For registration, sponsorship and staff inquiries, contact Marc1809 on Discord.", "primaryLabel": "Join Discord", "primaryHref": "https://discord.gg/Ssz3z7vvcB" } }
+      ]
+    },
+    {
+      "id": "page-news-registration",
+      "title": "Season One registration is open",
+      "slug": "season-one-registration-open",
+      "status": "published",
+      "scope": "global",
+      "seasonId": "season-one",
+      "blocks": [
+        { "id": "news-detail-hero", "type": "hero", "sortOrder": 1, "content": { "kicker": "Season", "title": "Season One registration is open", "body": "AMS begins onboarding alliances for the first official season. A minimum of 16 confirmed teams is required to commence." } },
+        { "id": "news-detail-body", "type": "text", "sortOrder": 2, "content": { "body": "Administrators can publish news, schedule dates, upload images, set categories and manage SEO fields without changing code." } }
+      ]
+    }
+  ],
+  "teams": [
+    { "id": "team-shadow-raiders", "slug": "shadow-raiders", "name": "Shadow Raiders", "logoText": "SR", "description": "A disciplined alliance built around controlled map pressure and late-game coordination.", "socialLinks": { "discord": "Shadow Raiders" } },
+    { "id": "team-the-crusaders", "slug": "the-crusaders", "name": "The Crusaders", "logoText": "TC", "description": "A veteran roster known for defensive planning, deep diplomacy and patient expansion.", "socialLinks": { "discord": "The Crusaders" } },
+    { "id": "team-fallen-angels", "slug": "fallen-angels-resurrection", "name": "Fallen Angels Resurrection", "logoText": "FA", "description": "An aggressive squad with fast starts and coordinated strike windows.", "socialLinks": { "discord": "Fallen Angels" } },
+    { "id": "team-wolf-company", "slug": "wolf-company", "name": "Wolf Company", "logoText": "WC", "description": "A balanced team with flexible commanders and consistent tournament attendance.", "socialLinks": { "discord": "Wolf Company" } },
+    { "id": "team-azrael-empire", "slug": "azrael-empire", "name": "Azrael Empire", "logoText": "AE", "description": "A rising alliance with high-tempo decision making and ambitious season objectives.", "socialLinks": { "discord": "Azrael Empire" } }
+  ],
+  "seasonTeams": [
+    { "seasonId": "season-one", "teamId": "team-shadow-raiders", "seed": 1, "status": "confirmed" },
+    { "seasonId": "season-one", "teamId": "team-the-crusaders", "seed": 2, "status": "confirmed" },
+    { "seasonId": "season-one", "teamId": "team-fallen-angels", "seed": 3, "status": "confirmed" },
+    { "seasonId": "season-one", "teamId": "team-wolf-company", "seed": 4, "status": "confirmed" },
+    { "seasonId": "season-one", "teamId": "team-azrael-empire", "seed": 5, "status": "confirmed" }
+  ],
+  "players": [
+    { "id": "player-marc", "slug": "marc1809", "name": "Marc", "handle": "Marc1809", "role": "Captain", "teamId": "team-shadow-raiders", "seasonId": "season-one" },
+    { "id": "player-valkyr", "slug": "valkyr", "name": "Valkyr", "handle": "Valkyr", "role": "Strategist", "teamId": "team-shadow-raiders", "seasonId": "season-one" }
+  ],
+  "mediaAssets": [],
+  "tournaments": [
+    { "id": "tournament-season-one-main", "seasonId": "season-one", "name": "Season One Playoffs", "slug": "season-one-playoffs", "status": "draft" }
+  ],
+  "stages": [
+    { "id": "stage-season-one-playoffs", "tournamentId": "tournament-season-one-main", "name": "Playoffs", "type": "single_elimination", "sortOrder": 1 }
+  ],
+  "matches": [
+    { "id": "match-001", "seasonId": "season-one", "tournamentId": "tournament-season-one-main", "stageId": "stage-season-one-playoffs", "title": "Opening Match", "status": "scheduled", "startsAt": "2026-06-21T19:00:00.000Z", "roundLabel": "Round 1", "bracketPosition": 1, "nextMatchId": "match-003", "nextMatchSlot": 1, "streamUrl": "https://twitch.tv/" },
+    { "id": "match-002", "seasonId": "season-one", "tournamentId": "tournament-season-one-main", "stageId": "stage-season-one-playoffs", "title": "Group A Feature", "status": "scheduled", "startsAt": "2026-06-24T20:00:00.000Z", "roundLabel": "Round 1", "bracketPosition": 2, "nextMatchId": "match-003", "nextMatchSlot": 2 },
+    { "id": "match-003", "seasonId": "season-one", "tournamentId": "tournament-season-one-main", "stageId": "stage-season-one-playoffs", "title": "Semifinal", "status": "scheduled", "startsAt": null, "roundLabel": "Semifinals", "bracketPosition": 1, "nextMatchId": "match-004", "nextMatchSlot": 1 },
+    { "id": "match-004", "seasonId": "season-one", "tournamentId": "tournament-season-one-main", "stageId": "stage-season-one-playoffs", "title": "Grand Final", "status": "scheduled", "startsAt": null, "roundLabel": "Grand Final", "bracketPosition": 1 }
+  ],
+  "matchParticipants": [
+    { "matchId": "match-001", "teamId": "team-shadow-raiders", "slot": 1, "score": null, "result": null },
+    { "matchId": "match-001", "teamId": "team-azrael-empire", "slot": 2, "score": null, "result": null },
+    { "matchId": "match-002", "teamId": "team-the-crusaders", "slot": 1, "score": null, "result": null },
+    { "matchId": "match-002", "teamId": "team-wolf-company", "slot": 2, "score": null, "result": null }
+  ],
+  "bracketEdges": [
+    { "id": "edge-001", "fromMatchId": "match-001", "outcome": "winner", "toMatchId": "match-003", "toSlot": 1 },
+    { "id": "edge-002", "fromMatchId": "match-002", "outcome": "winner", "toMatchId": "match-003", "toSlot": 2 },
+    { "id": "edge-003", "fromMatchId": "match-003", "outcome": "winner", "toMatchId": "match-004", "toSlot": 1 }
+  ],
+  "newsPosts": [
+    { "id": "news-registration", "seasonId": "season-one", "slug": "season-one-registration-open", "title": "Season One registration is open", "excerpt": "AMS begins onboarding alliances for the first official season.", "category": "Season", "status": "published", "publishedAt": "2026-06-10T09:00:00.000Z", "href": "/news/season-one-registration-open" },
+    { "id": "news-rules", "seasonId": "season-one", "slug": "ruleset-and-match-governance", "title": "Ruleset and match governance preview", "excerpt": "The first rules draft focuses on scheduling fairness and result verification.", "category": "Rules", "status": "published", "publishedAt": "2026-06-12T12:00:00.000Z", "href": "/seasons/season-one/rules" }
+  ],
+  "rulesets": [
+    { "id": "rules-season-one", "seasonId": "season-one", "title": "Season One Rulebook", "status": "published", "body": "All AMS matches are contested on the Antarctica 4x alliance map. The standard format is 6 versus 6. A full calendar month is allocated per match to support fair scheduling across time zones." }
+  ],
+  "sponsors": [
+    { "id": "sponsor-broadcast", "seasonId": "season-one", "name": "Broadcast Partners", "url": "#", "logoText": "BP", "isActive": true, "sortOrder": 1 },
+    { "id": "sponsor-community", "seasonId": "season-one", "name": "Community Sponsors", "url": "#", "logoText": "CS", "isActive": true, "sortOrder": 2 },
+    { "id": "sponsor-rules", "seasonId": "season-one", "name": "Rules Support", "url": "#", "logoText": "RS", "isActive": true, "sortOrder": 3 }
+  ],
+  "redirects": [
+    { "id": "redirect-bracket", "sourcePath": "/brackets", "destinationPath": "/seasons/season-one/bracket", "statusCode": 308, "isActive": true },
+    { "id": "redirect-teams", "sourcePath": "/teams", "destinationPath": "/seasons/season-one/teams", "statusCode": 308, "isActive": true },
+    { "id": "redirect-schedule", "sourcePath": "/schedule", "destinationPath": "/seasons/season-one/schedule", "statusCode": 308, "isActive": true },
+    { "id": "redirect-news", "sourcePath": "/news", "destinationPath": "/seasons/season-one/news", "statusCode": 308, "isActive": true }
+  ]
+}
