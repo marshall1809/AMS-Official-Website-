@@ -134,7 +134,8 @@ const siteSettingsSchema = z.object({
   contactUrl: z.string().optional(),
   footerText: z.string().optional(),
   logoText: z.string().min(1),
-  logoSubtext: z.string().optional()
+  logoSubtext: z.string().optional(),
+  logoImageUrl: z.string().optional()
 });
 
 export async function createSeasonAction(input: unknown) {
@@ -241,7 +242,6 @@ export async function advanceBracketWinnerAction(input: unknown) {
   if (error) throw error;
   revalidatePath("/");
 }
-
 export async function createNavigationItemAction(input: unknown) {
   const payload = navigationSchema.parse(input);
   const { supabase } = await requireAnyRole(["admin", "content_manager"]);
@@ -436,11 +436,16 @@ export async function updateSiteSettingsAction(input: unknown) {
 
   const { data: existing, error: selectError } = await supabase
     .from("site_settings")
-    .select("id")
+    .select("id, settings")
     .limit(1)
     .maybeSingle();
 
   if (selectError) throw selectError;
+
+  const existingSettings =
+    existing?.settings && typeof existing.settings === "object" && !Array.isArray(existing.settings)
+      ? existing.settings
+      : {};
 
   const values = {
     site_name: payload.siteName,
@@ -451,6 +456,10 @@ export async function updateSiteSettingsAction(input: unknown) {
     footer_text: payload.footerText || null,
     logo_text: payload.logoText,
     logo_subtext: payload.logoSubtext || null,
+    settings: {
+      ...existingSettings,
+      logoImageUrl: payload.logoImageUrl || null
+    },
     updated_at: new Date().toISOString()
   };
 
@@ -509,7 +518,6 @@ export async function updateThemeTokensFromFormAction(formData: FormData) {
     }
   });
 }
-
 export async function createPageFromFormAction(formData: FormData) {
   const scope = formString(formData, "scope") || "global";
   const seasonId = formString(formData, "seasonId");
@@ -653,7 +661,8 @@ export async function updateSiteSettingsFromFormAction(formData: FormData) {
     contactUrl: formString(formData, "contactUrl") || undefined,
     footerText: formString(formData, "footerText") || undefined,
     logoText: formString(formData, "logoText"),
-    logoSubtext: formString(formData, "logoSubtext") || undefined
+    logoSubtext: formString(formData, "logoSubtext") || undefined,
+    logoImageUrl: formString(formData, "logoImageUrl") || undefined
   });
 }
 
