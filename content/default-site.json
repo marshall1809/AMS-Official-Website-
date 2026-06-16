@@ -6,8 +6,9 @@
     "contactLabel": "Marc1809",
     "contactUrl": "https://discord.gg/Ssz3z7vvcB",
     "footerText": "Season One - June 2026 - Supremacy: World War 3",
-    "logoText": "AMS",
-    "logoSubtext": "Alliance Master Series"
+   "logoText": "AMS",
+"logoSubtext": "Alliance Master Series",
+"logoImageUrl": "/ams-logo.png"
   },
   "themes": [
     {
