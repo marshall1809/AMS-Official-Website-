@@ -6,9 +6,9 @@
     "contactLabel": "Marc1809",
     "contactUrl": "https://discord.gg/Ssz3z7vvcB",
     "footerText": "Season One - June 2026 - Supremacy: World War 3",
-   "logoText": "AMS",
-"logoSubtext": "Alliance Master Series",
-"logoImageUrl": "/ams-logo.png"
+    "logoText": "AMS",
+    "logoSubtext": "Alliance Master Series",
+    "logoImageUrl": "/ams-logo.png"
   },
   "themes": [
     {
@@ -112,7 +112,7 @@
       "seoDescription": "Where alliances become legends.",
       "blocks": [
         { "id": "home-announcement", "type": "announcement", "sortOrder": 1, "content": { "text": "Season One is now open for registration. Minimum 16 teams required to commence. Contact Marc1809 on Discord." } },
-        { "id": "home-hero", "type": "hero", "sortOrder": 2, "content": { "kicker": "Season One - June 2026", "title": "Where Alliances Become Legends.", "body": "The Alliance Master Series is the most structured, prestigious, and competitive alliance league ever organised for Supremacy: World War 3.", "primaryLabel": "View Teams", "primaryHref": "/seasons/season-one/teams", "secondaryLabel": "Open Bracket", "secondaryHref": "/seasons/season-one/bracket" } },
+        { "id": "home-hero", "type": "hero", "sortOrder": 2, "content": { "logoSrc": "/ams-logo.png", "logoAlt": "Alliance Master Series Logo", "kicker": "Season One - June 2026", "title": "Where Alliances Become Legends.", "body": "The Alliance Master Series is the most structured, prestigious, and competitive alliance league ever organised for Supremacy: World War 3.", "primaryLabel": "View Teams", "primaryHref": "/seasons/season-one/teams", "secondaryLabel": "Open Bracket", "secondaryHref": "/seasons/season-one/bracket" } },
         { "id": "home-stats", "type": "stat_cards", "sortOrder": 3, "content": { "items": [ { "label": "Teams registered", "value": "5 / 16" }, { "label": "Map", "value": "Antarctica 4x Alliance Map" }, { "label": "Format", "value": "6 vs 6" }, { "label": "Launch", "value": "June 2026" } ] } },
         { "id": "home-text", "type": "text", "sortOrder": 4, "content": { "kicker": "Competition model", "title": "A season-owned league ecosystem", "body": "Each AMS season can carry its own rules, teams, schedule, bracket, statistics, news, sponsors, media, navigation and design tokens." } },
         { "id": "home-matches", "type": "match_list", "sortOrder": 5, "content": { "title": "Next Matches", "seasonId": "season-one", "limit": 3 } },
@@ -121,7 +121,7 @@
         { "id": "home-sponsors", "type": "sponsor_strip", "sortOrder": 8, "content": { "title": "Sponsors", "seasonId": "season-one" } }
       ]
     },
-    {
+        {
       "id": "page-seasons",
       "title": "Seasons",
       "slug": "seasons",
@@ -247,7 +247,7 @@
     { "id": "team-wolf-company", "slug": "wolf-company", "name": "Wolf Company", "logoText": "WC", "description": "A balanced team with flexible commanders and consistent tournament attendance.", "socialLinks": { "discord": "Wolf Company" } },
     { "id": "team-azrael-empire", "slug": "azrael-empire", "name": "Azrael Empire", "logoText": "AE", "description": "A rising alliance with high-tempo decision making and ambitious season objectives.", "socialLinks": { "discord": "Azrael Empire" } }
   ],
-  "seasonTeams": [
+    "seasonTeams": [
     { "seasonId": "season-one", "teamId": "team-shadow-raiders", "seed": 1, "status": "confirmed" },
     { "seasonId": "season-one", "teamId": "team-the-crusaders", "seed": 2, "status": "confirmed" },
     { "seasonId": "season-one", "teamId": "team-fallen-angels", "seed": 3, "status": "confirmed" },
@@ -258,7 +258,16 @@
     { "id": "player-marc", "slug": "marc1809", "name": "Marc", "handle": "Marc1809", "role": "Captain", "teamId": "team-shadow-raiders", "seasonId": "season-one" },
     { "id": "player-valkyr", "slug": "valkyr", "name": "Valkyr", "handle": "Valkyr", "role": "Strategist", "teamId": "team-shadow-raiders", "seasonId": "season-one" }
   ],
-  "mediaAssets": [],
+  "mediaAssets": [
+    {
+      "id": "asset-ams-logo",
+      "bucket": "public",
+      "path": "ams-logo.png",
+      "title": "AMS Logo",
+      "altText": "Alliance Master Series Logo",
+      "publicUrl": "/ams-logo.png"
+    }
+  ],
   "tournaments": [
     { "id": "tournament-season-one-main", "seasonId": "season-one", "name": "Season One Playoffs", "slug": "season-one-playoffs", "status": "draft" }
   ],
