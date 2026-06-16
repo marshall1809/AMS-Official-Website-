@@ -31,91 +31,106 @@ const modules = [
     icon: BarChart3,
     title: "Dashboard",
     copy: "Current season overview, next matches, open tasks and recently edited content.",
-    role: "Viewer"
+    role: "Viewer",
+    href: "#admin-dashboard"
   },
   {
     icon: Trophy,
     title: "Season Manager",
-    copy: "Create, duplicate, activate, archive and soft-delete seasons with generated default pages.",
-    role: "Admin"
+    copy: "Create, activate, archive and soft-delete seasons with generated default pages.",
+    role: "Admin",
+    href: "#season-manager-workspace"
   },
   {
     icon: Brush,
     title: "Design Manager",
     copy: "Manage global and season theme tokens, logos, hero images, buttons, cards and preview states.",
-    role: "Designer"
+    role: "Designer",
+    href: "#design-manager-workspace"
   },
   {
     icon: PanelTop,
     title: "Page Builder",
     copy: "Build pages from approved blocks, control visibility, SEO, order, scope and versioning.",
-    role: "Content Manager"
+    role: "Content Manager",
+    href: "#page-builder-workspace"
   },
   {
     icon: Route,
     title: "Navigation Manager",
     copy: "Edit global and season-specific navigation, ordering, labels, links and hidden states.",
-    role: "Content Manager"
+    role: "Content Manager",
+    href: "#navigation-manager-workspace"
   },
   {
     icon: Users,
     title: "Team Manager",
     copy: "Manage teams, logos, social links, season participation, seeds and achievements.",
-    role: "Admin"
+    role: "Admin",
+    href: "#team-manager-workspace"
   },
   {
     icon: Users,
     title: "Player Manager",
     copy: "Manage players, handles, roles, team memberships, histories and statistics.",
-    role: "Admin"
+    role: "Admin",
+    href: "#team-manager-workspace"
   },
   {
     icon: CalendarDays,
     title: "Match/Schedule Manager",
     copy: "Create matches, schedule dates, set status, enter results, streams, VODs and reports.",
-    role: "Tournament Manager"
+    role: "Tournament Manager",
+    href: "#match-schedule-manager-workspace"
   },
   {
     icon: Swords,
     title: "Bracket Manager",
-    copy: "Generate single-elimination brackets, seed teams, enter winners and advance slots.",
-    role: "Tournament Manager"
+    copy: "Seed teams, enter winners and advance bracket slots from real bracket data.",
+    role: "Tournament Manager",
+    href: "#match-schedule-manager-workspace"
   },
   {
     icon: FileText,
     title: "Rules Manager",
     copy: "Create, edit, archive and publish season rulebooks with optional PDF attachments.",
-    role: "Content Manager"
+    role: "Content Manager",
+    href: "#news-manager-workspace"
   },
   {
     icon: Newspaper,
     title: "News Manager",
     copy: "Draft, schedule, categorize, publish and optimize season-specific news content.",
-    role: "Content Manager"
+    role: "Content Manager",
+    href: "#news-manager-workspace"
   },
   {
     icon: Activity,
     title: "Sponsor Manager",
     copy: "Manage global and season sponsors, logos, links, ordering and visibility.",
-    role: "Content Manager"
+    role: "Content Manager",
+    href: "#news-manager-workspace"
   },
   {
     icon: Image,
     title: "Media Manager",
-    copy: "Upload and manage AMS logos, season assets, team logos, banners, images and PDFs.",
-    role: "Media Manager"
+    copy: "Register AMS logos, season assets, team logos, banners, images and PDFs.",
+    role: "Media Manager",
+    href: "#media-manager-workspace"
   },
   {
     icon: Settings,
     title: "Settings",
-    copy: "Manage global website data, contact information, footer, social links and SEO defaults.",
-    role: "Super Admin"
+    copy: "Manage global website data, contact information, footer, logo and SEO defaults.",
+    role: "Super Admin",
+    href: "#media-manager-workspace"
   },
   {
     icon: ListTree,
     title: "Audit Log",
     copy: "Review changes to seasons, pages, themes, brackets, media and settings.",
-    role: "Viewer"
+    role: "Viewer",
+    href: "#audit-log-workspace"
   }
 ];
 
@@ -155,7 +170,7 @@ export function AdminShell({ data, isWritable }: { data: CmsData; isWritable: bo
           <h1>{data.siteSettings.logoText} Control</h1>
           <nav aria-label="Admin modules">
             {modules.map((module) => (
-              <a href={`#${slugify(module.title)}`} key={module.title}>
+              <a href={module.href} key={module.title}>
                 <module.icon size={16} />
                 {module.title}
               </a>
@@ -174,43 +189,58 @@ export function AdminShell({ data, isWritable }: { data: CmsData; isWritable: bo
               <div>
                 <strong>Supabase write mode is not configured.</strong>
                 <p>
-                  The admin forms are rendered as the production architecture, but
-                  writing is disabled until Supabase environment variables and
-                  authenticated roles are available.
+                  The admin forms are visible, but writing is disabled until the
+                  Supabase environment variables are set in Vercel and your user
+                  has an admin role.
                 </p>
               </div>
             </div>
           ) : null}
-          <div className="admin-hero panel">
+
+          <div className="admin-hero panel" id="admin-dashboard">
             <div>
               <p className="section-kicker">Current Season</p>
               <h2>{activeSeason?.name ?? "No active season"}</h2>
               <p>
-                This area is the CMS and tournament management cockpit. The next
-                implementation layer connects forms, server actions, validation,
-                RLS-backed writes and audit logging for each module.
+                Use the sidebar or the module cards below to jump directly to
+                the editable areas for seasons, design, pages, navigation,
+                teams, matches, brackets, news, sponsors, logo and settings.
               </p>
+              <div className="hero__actions">
+                <a className="button" href="#season-manager-workspace">
+                  New season
+                </a>
+                <a className="button button--ghost" href="#design-manager-workspace">
+                  Edit design
+                </a>
+                <a className="button button--ghost" href="#media-manager-workspace">
+                  Change logo
+                </a>
+              </div>
             </div>
             <ShieldCheck size={44} />
           </div>
+
           <div className="admin-metrics">
             <Metric label="Seasons" value={String(data.seasons.length)} note="managed packages" />
             <Metric label="Teams" value={String(seasonTeams.length)} note="current season" />
             <Metric label="Matches" value={String(seasonMatches.length)} note="current season" />
             <Metric label="Pages" value={String(publishedPages.length)} note="published routes" />
           </div>
+
           <div className="admin-modules">
             {modules.map((module) => (
-              <article className="admin-module panel" id={slugify(module.title)} key={module.title}>
+              <a className="admin-module panel" href={module.href} key={module.title}>
                 <module.icon size={24} />
                 <div>
                   <h3>{module.title}</h3>
                   <p>{module.copy}</p>
                   <span>{module.role}</span>
                 </div>
-              </article>
+              </a>
             ))}
           </div>
+
           <SeasonManagerSection data={data} isWritable={isWritable} />
           <DesignManagerSection data={data} isWritable={isWritable} />
           <PageBuilderSection data={data} isWritable={isWritable} />
@@ -229,10 +259,6 @@ function Metric({ label, value, note }: { label: string; value: string; note: st
       <small>{note}</small>
     </article>
   );
-}
-
-function slugify(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 function SeasonManagerSection({ data, isWritable }: { data: CmsData; isWritable: boolean }) {
