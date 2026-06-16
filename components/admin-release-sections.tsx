@@ -205,9 +205,10 @@ function MediaSettingsSection({ data, isWritable }: { data: CmsData; isWritable:
             <label>Contact label<input name="contactLabel" defaultValue={data.siteSettings.contactLabel} /></label>
             <label>Contact URL<input name="contactUrl" defaultValue={data.siteSettings.contactUrl} /></label>
             <label>Footer text<input name="footerText" defaultValue={data.siteSettings.footerText} /></label>
-            <label>Logo text<input name="logoText" defaultValue={data.siteSettings.logoText} required /></label>
-            <label>Logo subtext<input name="logoSubtext" defaultValue={data.siteSettings.logoSubtext} /></label>
-            <button className="button" type="submit">Save settings</button>
+           <label>Logo text<input name="logoText" defaultValue={data.siteSettings.logoText} required /></label>
+<label>Logo subtext<input name="logoSubtext" defaultValue={data.siteSettings.logoSubtext} /></label>
+<label>Logo image URL<input name="logoImageUrl" defaultValue={data.siteSettings.logoImageUrl ?? "/ams-logo.png"} placeholder="/ams-logo.png" /></label>
+<button className="button" type="submit">Save settings</button>
           </fieldset>
         </form>
       </div>
