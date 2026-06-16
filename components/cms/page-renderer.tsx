@@ -413,11 +413,29 @@ function FaqBlock({ block }: { block: PageBlock }) {
     </section>
   );
 }
-
 function SeasonListBlock({ block, data }: { block: PageBlock; data: CmsData }) {
   return (
     <section className="container content-section">
       <SectionTitle title={stringValue(block.content.title, "Seasons")} />
       <div className="season-grid">
         {data.seasons
-          .filter((
+          .filter((season) => season.status !== "deleted")
+          .map((season) => (
+            <Link className="season-card panel" href={`/seasons/${season.slug}`} key={season.id}>
+              <span className="status-pill">{season.status}</span>
+              <h2>{season.name}</h2>
+              <p>{season.summary}</p>
+            </Link>
+          ))}
+      </div>
+    </section>
+  );
+}
+
+function SectionTitle({ title }: { title: string }) {
+  return (
+    <div className="section-heading compact">
+      <h2>{title}</h2>
+    </div>
+  );
+}
