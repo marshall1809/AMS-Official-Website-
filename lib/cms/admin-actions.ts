@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAnyRole } from "@/lib/auth/server";
 
+const teamStatuses = ["active", "inactive", "eliminated", "archived"] as const;
+
 const createSeasonSchema = z.object({
   name: z.string().min(2),
   slug: z.string().regex(/^[a-z0-9-]+$/),
@@ -57,12 +59,28 @@ const navigationSchema = z.object({
 const teamSchema = z.object({
   name: z.string().min(1),
   slug: z.string().regex(/^[a-z0-9-]+$/),
+  tag: z.string().max(12).optional(),
   logoText: z.string().max(6).optional(),
+  logoAssetId: z.string().uuid().optional(),
   description: z.string().optional(),
   socialLinks: z.record(z.string(), z.unknown()).default({}),
-  seasonId: z.string().uuid().optional(),
+  seasonId: z.string().uuid(),
   seed: z.number().int().optional(),
-  status: z.enum(["confirmed", "pending", "withdrawn"]).default("pending")
+  status: z.enum(teamStatuses).default("active")
+});
+
+const seasonTeamUpdateSchema = z.object({
+  seasonId: z.string().uuid(),
+  teamId: z.string().uuid(),
+  name: z.string().min(1).optional(),
+  slug: z.string().regex(/^[a-z0-9-]+$/).optional(),
+  tag: z.string().max(12).optional(),
+  logoText: z.string().max(6).optional(),
+  logoAssetId: z.string().uuid().optional(),
+  description: z.string().optional(),
+  socialLinks: z.record(z.string(), z.unknown()).optional(),
+  seed: z.number().int().optional(),
+  status: z.enum(teamStatuses).optional()
 });
 
 const playerSchema = z.object({
@@ -149,7 +167,7 @@ export async function createSeasonAction(input: unknown) {
   });
 
   if (error) throw error;
-  revalidatePath("/");
+  revalidateAll();
   return data as string;
 }
 
@@ -164,7 +182,7 @@ export async function updateSeasonStatusAction(input: unknown) {
 
   const { error } = await supabase.from("seasons").update(update).eq("id", payload.seasonId);
   if (error) throw error;
-  revalidatePath("/");
+  revalidateAll();
 }
 
 export async function updateThemeTokensAction(input: unknown) {
@@ -177,7 +195,7 @@ export async function updateThemeTokensAction(input: unknown) {
     .eq("id", payload.themeId);
 
   if (error) throw error;
-  revalidatePath("/");
+  revalidateAll();
 }
 
 export async function createPageAction(input: unknown) {
@@ -208,7 +226,7 @@ export async function createPageAction(input: unknown) {
   });
 
   if (routeError) throw routeError;
-  revalidatePath("/");
+  revalidateAll();
   return page.id as string;
 }
 
@@ -227,7 +245,7 @@ export async function upsertPageBlockAction(input: unknown) {
   });
 
   if (error) throw error;
-  revalidatePath("/");
+  revalidateAll();
 }
 
 export async function advanceBracketWinnerAction(input: unknown) {
@@ -240,8 +258,9 @@ export async function advanceBracketWinnerAction(input: unknown) {
   });
 
   if (error) throw error;
-  revalidatePath("/");
+  revalidateAll();
 }
+
 export async function createNavigationItemAction(input: unknown) {
   const payload = navigationSchema.parse(input);
   const { supabase } = await requireAnyRole(["admin", "content_manager"]);
@@ -256,39 +275,80 @@ export async function createNavigationItemAction(input: unknown) {
   });
 
   if (error) throw error;
-  revalidatePath("/");
+  revalidateAll();
 }
 
 export async function createTeamAction(input: unknown) {
   const payload = teamSchema.parse(input);
   const { supabase } = await requireAnyRole(["admin"]);
 
+  const baseTeamValues = {
+    name: payload.name,
+    slug: payload.slug,
+    logo_text: payload.logoText || null,
+    default_logo_id: payload.logoAssetId || null,
+    tag: payload.tag || null,
+    description: payload.description || null,
+    social_links: payload.socialLinks
+  };
+
   const { data: team, error } = await supabase
     .from("teams")
-    .insert({
-      name: payload.name,
-      slug: payload.slug,
-      logo_text: payload.logoText || null,
-      description: payload.description || null,
-      social_links: payload.socialLinks
-    })
+    .insert(baseTeamValues)
     .select("id")
     .single();
 
   if (error) throw error;
 
-  if (payload.seasonId) {
-    const { error: seasonTeamError } = await supabase.from("season_teams").insert({
-      season_id: payload.seasonId,
-      team_id: team.id,
-      seed: payload.seed ?? null,
-      status: payload.status
-    });
+  const { error: seasonTeamError } = await supabase.from("season_teams").insert({
+    season_id: payload.seasonId,
+    team_id: team.id,
+    seed: payload.seed ?? null,
+    status: payload.status,
+    logo_asset_id: payload.logoAssetId || null,
+    tag: payload.tag || null
+  });
 
-    if (seasonTeamError) throw seasonTeamError;
-  }
+  if (seasonTeamError) throw seasonTeamError;
+  revalidateAll();
+}
 
-  revalidatePath("/");
+export async function updateSeasonTeamAction(input: unknown) {
+  const payload = seasonTeamUpdateSchema.parse(input);
+  const { supabase } = await requireAnyRole(["admin"]);
+
+  const teamUpdate: Record<string, unknown> = {
+    updated_at: new Date().toISOString()
+  };
+
+  if (payload.name) teamUpdate.name = payload.name;
+  if (payload.slug) teamUpdate.slug = payload.slug;
+  if (payload.tag !== undefined) teamUpdate.tag = payload.tag || null;
+  if (payload.logoText !== undefined) teamUpdate.logo_text = payload.logoText || null;
+  if (payload.logoAssetId !== undefined) teamUpdate.default_logo_id = payload.logoAssetId || null;
+  if (payload.description !== undefined) teamUpdate.description = payload.description || null;
+  if (payload.socialLinks !== undefined) teamUpdate.social_links = payload.socialLinks;
+
+  const { error: teamError } = await supabase.from("teams").update(teamUpdate).eq("id", payload.teamId);
+  if (teamError) throw teamError;
+
+  const participationUpdate: Record<string, unknown> = {
+    updated_at: new Date().toISOString()
+  };
+
+  if (payload.seed !== undefined) participationUpdate.seed = payload.seed;
+  if (payload.status !== undefined) participationUpdate.status = payload.status;
+  if (payload.tag !== undefined) participationUpdate.tag = payload.tag || null;
+  if (payload.logoAssetId !== undefined) participationUpdate.logo_asset_id = payload.logoAssetId || null;
+
+  const { error: participationError } = await supabase
+    .from("season_teams")
+    .update(participationUpdate)
+    .eq("season_id", payload.seasonId)
+    .eq("team_id", payload.teamId);
+
+  if (participationError) throw participationError;
+  revalidateAll();
 }
 
 export async function createPlayerAction(input: unknown) {
@@ -301,7 +361,9 @@ export async function createPlayerAction(input: unknown) {
       name: payload.name,
       handle: payload.handle,
       slug: payload.slug,
-      role: payload.role || null
+      role: payload.role || null,
+      team_id: payload.teamId || null,
+      season_id: payload.seasonId || null
     })
     .select("id")
     .single();
@@ -316,10 +378,12 @@ export async function createPlayerAction(input: unknown) {
       role: payload.role || null
     });
 
-    if (membershipError) throw membershipError;
+    if (membershipError && !String(membershipError.message).includes("team_memberships")) {
+      throw membershipError;
+    }
   }
 
-  revalidatePath("/");
+  revalidateAll();
 }
 
 export async function createMatchAction(input: unknown) {
@@ -351,14 +415,11 @@ export async function createMatchAction(input: unknown) {
   ].filter(isDefined);
 
   if (participants.length) {
-    const { error: participantError } = await supabase
-      .from("match_participants")
-      .insert(participants);
-
+    const { error: participantError } = await supabase.from("match_participants").insert(participants);
     if (participantError) throw participantError;
   }
 
-  revalidatePath("/");
+  revalidateAll();
 }
 
 export async function createNewsPostAction(input: unknown) {
@@ -378,7 +439,7 @@ export async function createNewsPostAction(input: unknown) {
   });
 
   if (error) throw error;
-  revalidatePath("/");
+  revalidateAll();
 }
 
 export async function createRulesetAction(input: unknown) {
@@ -393,7 +454,7 @@ export async function createRulesetAction(input: unknown) {
   });
 
   if (error) throw error;
-  revalidatePath("/");
+  revalidateAll();
 }
 
 export async function createSponsorAction(input: unknown) {
@@ -410,7 +471,7 @@ export async function createSponsorAction(input: unknown) {
   });
 
   if (error) throw error;
-  revalidatePath("/");
+  revalidateAll();
 }
 
 export async function createMediaAssetAction(input: unknown) {
@@ -427,7 +488,7 @@ export async function createMediaAssetAction(input: unknown) {
   });
 
   if (error) throw error;
-  revalidatePath("/");
+  revalidateAll();
 }
 
 export async function updateSiteSettingsAction(input: unknown) {
@@ -469,16 +530,14 @@ export async function updateSiteSettingsAction(input: unknown) {
 
   const { error } = await query;
   if (error) throw error;
-  revalidatePath("/");
+  revalidateAll();
 }
 
 export async function createSeasonFromFormAction(formData: FormData) {
-  const themeTokens = parseJsonObject(formString(formData, "themeTokens"), {});
-
   await createSeasonAction({
     name: formString(formData, "name"),
     slug: formString(formData, "slug"),
-    themeTokens
+    themeTokens: parseJsonObject(formString(formData, "themeTokens"), {})
   });
 }
 
@@ -518,6 +577,7 @@ export async function updateThemeTokensFromFormAction(formData: FormData) {
     }
   });
 }
+
 export async function createPageFromFormAction(formData: FormData) {
   const scope = formString(formData, "scope") || "global";
   const seasonId = formString(formData, "seasonId");
@@ -535,7 +595,6 @@ export async function createPageFromFormAction(formData: FormData) {
 }
 
 export async function upsertPageBlockFromFormAction(formData: FormData) {
-  const content = parseJsonObject(formString(formData, "content"), {});
   const blockId = formString(formData, "blockId");
 
   await upsertPageBlockAction({
@@ -544,7 +603,7 @@ export async function upsertPageBlockFromFormAction(formData: FormData) {
     type: formString(formData, "type"),
     sortOrder: Number(formString(formData, "sortOrder") || 0),
     isVisible: formData.get("isVisible") === "on",
-    content
+    content: parseJsonObject(formString(formData, "content"), {})
   });
 }
 
@@ -563,12 +622,30 @@ export async function createTeamFromFormAction(formData: FormData) {
   await createTeamAction({
     name: formString(formData, "name"),
     slug: formString(formData, "slug"),
+    tag: formString(formData, "tag") || undefined,
     logoText: formString(formData, "logoText") || undefined,
+    logoAssetId: formString(formData, "logoAssetId") || undefined,
     description: formString(formData, "description") || undefined,
     socialLinks: parseJsonObject(formString(formData, "socialLinks"), {}),
-    seasonId: formString(formData, "seasonId") || undefined,
+    seasonId: formString(formData, "seasonId"),
     seed: optionalNumber(formString(formData, "seed")),
-    status: formString(formData, "status") || "pending"
+    status: formString(formData, "status") || "active"
+  });
+}
+
+export async function updateSeasonTeamFromFormAction(formData: FormData) {
+  await updateSeasonTeamAction({
+    seasonId: formString(formData, "seasonId"),
+    teamId: formString(formData, "teamId"),
+    name: formString(formData, "name") || undefined,
+    slug: formString(formData, "slug") || undefined,
+    tag: formString(formData, "tag") || undefined,
+    logoText: formString(formData, "logoText") || undefined,
+    logoAssetId: formString(formData, "logoAssetId") || undefined,
+    description: formString(formData, "description") || undefined,
+    socialLinks: parseJsonObject(formString(formData, "socialLinks"), {}),
+    seed: optionalNumber(formString(formData, "seed")),
+    status: formString(formData, "status") || undefined
   });
 }
 
@@ -664,6 +741,11 @@ export async function updateSiteSettingsFromFormAction(formData: FormData) {
     logoSubtext: formString(formData, "logoSubtext") || undefined,
     logoImageUrl: formString(formData, "logoImageUrl") || undefined
   });
+}
+
+function revalidateAll() {
+  revalidatePath("/");
+  revalidatePath("/admin");
 }
 
 function formString(formData: FormData, key: string) {
