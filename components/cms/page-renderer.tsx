@@ -82,10 +82,19 @@ function AnnouncementBlock({ block }: { block: PageBlock }) {
 function HeroBlock({ block }: { block: PageBlock }) {
   const primaryHref = stringValue(block.content.primaryHref);
   const secondaryHref = stringValue(block.content.secondaryHref);
+  const logoSrc = stringValue(block.content.logoSrc);
 
   return (
     <section className="hero">
       <div className="container hero__inner">
+        {logoSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className="hero__logo"
+            src={logoSrc}
+            alt={stringValue(block.content.logoAlt, "Alliance Master Series")}
+          />
+        ) : null}
         {block.content.kicker ? <p className="section-kicker">{stringValue(block.content.kicker)}</p> : null}
         <h1>{stringValue(block.content.title, "Untitled")}</h1>
         {block.content.body ? <p>{stringValue(block.content.body)}</p> : null}
@@ -232,12 +241,14 @@ function MatchCard({ data, match }: { data: CmsData; match: MatchRecord }) {
       <div className="match-card__meta">
         <span>
           <CalendarClock size={15} />
-          {match.startsAt ? new Intl.DateTimeFormat("en", {
-            month: "short",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit"
-          }).format(new Date(match.startsAt)) : "TBD"}
+          {match.startsAt
+            ? new Intl.DateTimeFormat("en", {
+                month: "short",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit"
+              }).format(new Date(match.startsAt))
+            : "TBD"}
         </span>
         <span>{match.status}</span>
       </div>
@@ -409,23 +420,4 @@ function SeasonListBlock({ block, data }: { block: PageBlock; data: CmsData }) {
       <SectionTitle title={stringValue(block.content.title, "Seasons")} />
       <div className="season-grid">
         {data.seasons
-          .filter((season) => season.status !== "deleted")
-          .map((season) => (
-            <Link className="season-card panel" href={`/seasons/${season.slug}`} key={season.id}>
-              <span className="status-pill">{season.status}</span>
-              <h2>{season.name}</h2>
-              <p>{season.summary}</p>
-            </Link>
-          ))}
-      </div>
-    </section>
-  );
-}
-
-function SectionTitle({ title }: { title: string }) {
-  return (
-    <div className="section-heading compact">
-      <h2>{title}</h2>
-    </div>
-  );
-}
+          .filter((
