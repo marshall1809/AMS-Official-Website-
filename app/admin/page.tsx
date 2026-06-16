@@ -28,7 +28,7 @@ export default async function AdminPage({
   );
 
   if (!hasSupabaseEnv) {
-    return <AdminShell data={data} isWritable={false} />;
+    return <AdminShell data={data} isWritable={false} sectionPath={[]} />;
   }
 
   const supabase = await createSupabaseServerClient();
@@ -45,5 +45,5 @@ export default async function AdminPage({
   const userRoles = new Set((roles ?? []).map((item) => item.role as AppRole));
   const isWritable = writeRoles.some((role) => userRoles.has(role));
 
-  return <AdminShell data={data} isWritable={isWritable} />;
+  return <AdminShell data={data} isWritable={isWritable} sectionPath={[]} />;
 }
