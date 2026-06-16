@@ -155,7 +155,6 @@ export type TeamRecord = {
   description?: string;
   socialLinks?: Record<string, string>;
 };
-
 export type SeasonTeamRecord = {
   seasonId: string;
   teamId: string;
@@ -170,4 +169,131 @@ export type PlayerRecord = {
   name: string;
   handle: string;
   role?: string;
-  teamId?:
+  teamId?: string;
+  seasonId?: string;
+};
+
+export type TournamentRecord = {
+  id: string;
+  seasonId: string;
+  name: string;
+  slug: string;
+  status: EntityStatus | "active";
+};
+
+export type StageRecord = {
+  id: string;
+  tournamentId: string;
+  name: string;
+  type: StageType;
+  sortOrder: number;
+};
+
+export type MatchRecord = {
+  id: string;
+  seasonId: string;
+  tournamentId?: string;
+  stageId?: string;
+  title: string;
+  status: MatchStatus;
+  startsAt?: string | null;
+  roundLabel?: string;
+  bracketPosition?: number;
+  winnerTeamId?: string;
+  nextMatchId?: string;
+  nextMatchSlot?: 1 | 2;
+  streamUrl?: string;
+  vodUrl?: string;
+  report?: string;
+};
+
+export type MatchParticipantRecord = {
+  matchId: string;
+  teamId?: string | null;
+  slot: 1 | 2;
+  score?: number | null;
+  result?: string | null;
+};
+
+export type BracketEdgeRecord = {
+  id: string;
+  fromMatchId: string;
+  outcome: "winner" | "loser";
+  toMatchId: string;
+  toSlot: 1 | 2;
+};
+
+export type NewsPostRecord = {
+  id: string;
+  seasonId?: string;
+  slug: string;
+  title: string;
+  excerpt?: string;
+  category?: string;
+  status: EntityStatus;
+  publishedAt?: string;
+  href?: string;
+};
+
+export type RulesetRecord = {
+  id: string;
+  seasonId?: string;
+  title: string;
+  status: EntityStatus;
+  body: string;
+  pdfAssetId?: string;
+};
+
+export type SponsorRecord = {
+  id: string;
+  seasonId?: string;
+  name: string;
+  url?: string;
+  logoText?: string;
+  logoAssetId?: string;
+  isActive: boolean;
+  sortOrder: number;
+};
+
+export type CmsData = {
+  siteSettings: SiteSettings;
+  themes: ThemeRecord[];
+  seasons: SeasonRecord[];
+  navigationItems: NavigationItem[];
+  routes: RouteRecord[];
+  redirects: RedirectRecord[];
+  pages: PageRecord[];
+  mediaAssets: MediaAsset[];
+  teams: TeamRecord[];
+  seasonTeams: SeasonTeamRecord[];
+  players: PlayerRecord[];
+  tournaments: TournamentRecord[];
+  stages: StageRecord[];
+  matches: MatchRecord[];
+  matchParticipants: MatchParticipantRecord[];
+  bracketEdges: BracketEdgeRecord[];
+  newsPosts: NewsPostRecord[];
+  rulesets: RulesetRecord[];
+  sponsors: SponsorRecord[];
+};
+
+export type ResolvedRoute =
+  | {
+      kind: "page";
+      page: PageRecord;
+      season?: SeasonRecord;
+      theme: ThemeRecord;
+    }
+  | {
+      kind: "redirect";
+      destination: string;
+      permanent: boolean;
+    }
+  | {
+      kind: "gone";
+    }
+  | {
+      kind: "not_found";
+    };
+
+export type ThemeStyle = CSSProperties & Record<`--${string}`, string>;
