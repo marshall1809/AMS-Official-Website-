@@ -11,6 +11,8 @@ export type AppRole =
 
 export type EntityStatus = "draft" | "published" | "archived" | "deleted";
 export type SeasonStatus = "draft" | "active" | "archived" | "deleted";
+export type TeamParticipationStatus = "active" | "inactive" | "eliminated" | "archived";
+export type LegacyTeamParticipationStatus = "confirmed" | "pending" | "withdrawn";
 export type MatchStatus = "scheduled" | "live" | "completed" | "postponed" | "cancelled";
 export type StageType = "group" | "single_elimination" | "double_elimination";
 export type RouteTargetType = "page" | "season" | "team" | "player" | "news" | "redirect" | "gone";
@@ -150,17 +152,24 @@ export type TeamRecord = {
   id: string;
   slug: string;
   name: string;
+  tag?: string;
   logoText?: string;
+  defaultLogoId?: string;
   logoAssetId?: string;
   description?: string;
   socialLinks?: Record<string, string>;
 };
+
 export type SeasonTeamRecord = {
+  id?: string;
   seasonId: string;
   teamId: string;
   seed?: number;
-  status: "confirmed" | "pending" | "withdrawn";
+  status: TeamParticipationStatus | LegacyTeamParticipationStatus;
   groupName?: string;
+  logoAssetId?: string;
+  tag?: string;
+  displayName?: string;
 };
 
 export type PlayerRecord = {
