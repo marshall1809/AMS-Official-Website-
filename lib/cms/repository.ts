@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { defaultCmsData } from "@/lib/cms/default-data";
-import type { CmsData } from "@/lib/cms/types";
+import type { CmsData, SiteSettings } from "@/lib/cms/types";
 
 const tableNames = [
   "site_settings",
@@ -70,6 +70,21 @@ async function fetchTable(table: SupabaseTable) {
   return data ?? [];
 }
 
+function normalizeSiteSettings(record: unknown): SiteSettings {
+  const settings = camelize(record) as (SiteSettings & { settings?: Record<string, unknown> }) | undefined;
+
+  if (!settings) return defaultCmsData.siteSettings;
+
+  const storedLogoImageUrl =
+    typeof settings.settings?.logoImageUrl === "string" ? settings.settings.logoImageUrl : undefined;
+
+  return {
+    ...defaultCmsData.siteSettings,
+    ...settings,
+    logoImageUrl: storedLogoImageUrl ?? settings.logoImageUrl ?? defaultCmsData.siteSettings.logoImageUrl
+  };
+}
+
 function normalizeSupabaseData(raw: Record<SupabaseTable, unknown[]>): CmsData {
   const pages = (camelize(raw.pages) as Array<Record<string, unknown> & { id: string }>).map((page) => ({
     ...page,
@@ -82,9 +97,7 @@ function normalizeSupabaseData(raw: Record<SupabaseTable, unknown[]>): CmsData {
 
   return {
     ...defaultCmsData,
-    siteSettings:
-      ((camelize(raw.site_settings?.[0]) as CmsData["siteSettings"] | undefined) ??
-        defaultCmsData.siteSettings),
+    siteSettings: normalizeSiteSettings(raw.site_settings?.[0]),
     themes: camelize(raw.themes) as CmsData["themes"],
     seasons: camelize(raw.seasons) as CmsData["seasons"],
     navigationItems: camelize(raw.navigation_items) as CmsData["navigationItems"],
