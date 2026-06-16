@@ -5,7 +5,9 @@ import type {
   MatchParticipantRecord,
   MatchRecord,
   PageBlock,
-  PageRecord
+  PageRecord,
+  SeasonTeamRecord,
+  TeamRecord
 } from "@/lib/cms/types";
 
 export function PageRenderer({ data, page }: { data: CmsData; page: PageRecord }) {
@@ -16,13 +18,13 @@ export function PageRenderer({ data, page }: { data: CmsData; page: PageRecord }
   return (
     <>
       {blocks.map((block) => (
-        <BlockRenderer block={block} data={data} key={block.id} />
+        <BlockRenderer block={block} data={data} page={page} key={block.id} />
       ))}
     </>
   );
 }
 
-function BlockRenderer({ block, data }: { block: PageBlock; data: CmsData }) {
+function BlockRenderer({ block, data, page }: { block: PageBlock; data: CmsData; page: PageRecord }) {
   switch (block.type) {
     case "announcement":
       return <AnnouncementBlock block={block} />;
@@ -37,17 +39,17 @@ function BlockRenderer({ block, data }: { block: PageBlock; data: CmsData }) {
     case "stat_cards":
       return <StatCardsBlock block={block} />;
     case "team_list":
-      return <TeamListBlock block={block} data={data} />;
+      return <TeamListBlock block={block} data={data} page={page} />;
     case "match_list":
-      return <MatchListBlock block={block} data={data} />;
+      return <MatchListBlock block={block} data={data} page={page} />;
     case "bracket_embed":
-      return <BracketBlock block={block} data={data} />;
+      return <BracketBlock block={block} data={data} page={page} />;
     case "news_list":
-      return <NewsListBlock block={block} data={data} />;
+      return <NewsListBlock block={block} data={data} page={page} />;
     case "rules_block":
-      return <RulesBlock block={block} data={data} />;
+      return <RulesBlock block={block} data={data} page={page} />;
     case "sponsor_strip":
-      return <SponsorStripBlock block={block} data={data} />;
+      return <SponsorStripBlock block={block} data={data} page={page} />;
     case "cta":
       return <CtaBlock block={block} />;
     case "faq":
@@ -71,12 +73,46 @@ function arrayValue<T = Record<string, unknown>>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
 
-function AnnouncementBlock({ block }: { block: PageBlock }) {
+function seasonIdFor(block: PageBlock, page: PageRecord, data: CmsData) {
+  return stringValue(block.content.seasonId) || page.seasonId || data.seasons.find((season) => season.status === "active")?.id || data.seasons[0]?.id;
+}
+
+function normalizeTeamStatus(status?: string) {
+  if (status === "confirmed") return "active";
+  if (status === "pending") return "inactive";
+  if (status === "withdrawn") return "archived";
+  return status ?? "active";
+}
+
+function getSeasonTeamEntries(data: CmsData, seasonId?: string) {
+  if (!seasonId) return [];
+  return data.seasonTeams
+    .filter((entry) => entry.seasonId === seasonId && normalizeTeamStatus(entry.status) !== "archived")
+    .map((seasonTeam) => ({
+      seasonTeam,
+      team: data.teams.find((team) => team.id === seasonTeam.teamId)
+    }))
+    .filter((entry): entry is { seasonTeam: SeasonTeamRecord; team: TeamRecord } => Boolean(entry.team))
+    .sort((a, b) => (a.seasonTeam.seed ?? 999) - (b.seasonTeam.seed ?? 999));
+}
+
+function getTeamLogo(data: CmsData, team: TeamRecord, seasonTeam?: SeasonTeamRecord) {
+  const assetId = seasonTeam?.logoAssetId ?? team.defaultLogoId ?? team.logoAssetId;
+  return data.mediaAssets.find((asset) => asset.id === assetId)?.publicUrl;
+}
+
+function TeamMark({ data, team, seasonTeam }: { data: CmsData; team?: TeamRecord; seasonTeam?: SeasonTeamRecord }) {
+  if (!team) return <span className="team-card__mark">TBD</span>;
+  const logo = getTeamLogo(data, team, seasonTeam);
   return (
-    <section className="announcement">
-      <div className="container">{stringValue(block.content.text)}</div>
-    </section>
+    <span className="team-card__mark">
+      {logo ? <img src={logo} alt={team.name} /> : team.logoText ?? seasonTeam?.tag ?? team.tag ?? team.name.slice(0, 2)}
+    </span>
   );
+}
+
+function AnnouncementBlock({ block }: { block: PageBlock }) {
+  return <section className="announcement"><div className="container">{stringValue(block.content.text)}</div></section>;
 }
 
 function HeroBlock({ block }: { block: PageBlock }) {
@@ -87,28 +123,13 @@ function HeroBlock({ block }: { block: PageBlock }) {
   return (
     <section className="hero">
       <div className="container hero__inner">
-        {logoSrc ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            className="hero__logo"
-            src={logoSrc}
-            alt={stringValue(block.content.logoAlt, "Alliance Master Series")}
-          />
-        ) : null}
+        {logoSrc ? <img className="hero__logo" src={logoSrc} alt={stringValue(block.content.logoAlt, "Alliance Master Series")} /> : null}
         {block.content.kicker ? <p className="section-kicker">{stringValue(block.content.kicker)}</p> : null}
         <h1>{stringValue(block.content.title, "Untitled")}</h1>
         {block.content.body ? <p>{stringValue(block.content.body)}</p> : null}
         <div className="hero__actions">
-          {primaryHref ? (
-            <Link className="button" href={primaryHref}>
-              {stringValue(block.content.primaryLabel, "Open")}
-            </Link>
-          ) : null}
-          {secondaryHref ? (
-            <Link className="button secondary" href={secondaryHref}>
-              {stringValue(block.content.secondaryLabel, "Learn more")}
-            </Link>
-          ) : null}
+          {primaryHref ? <Link className="button" href={primaryHref}>{stringValue(block.content.primaryLabel, "Open")}</Link> : null}
+          {secondaryHref ? <Link className="button secondary" href={secondaryHref}>{stringValue(block.content.secondaryLabel, "Learn more")}</Link> : null}
         </div>
       </div>
     </section>
@@ -130,18 +151,11 @@ function TextBlock({ block }: { block: PageBlock }) {
 function ImageBlock({ block, data }: { block: PageBlock; data: CmsData }) {
   const asset = data.mediaAssets.find((item) => item.id === block.content.assetId);
   if (!asset?.publicUrl) return null;
-
-  return (
-    <section className="container content-section">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="media-image" src={asset.publicUrl} alt={asset.altText ?? asset.title ?? ""} />
-    </section>
-  );
+  return <section className="container content-section"><img className="media-image" src={asset.publicUrl} alt={asset.altText ?? asset.title ?? ""} /></section>;
 }
 
 function ImageTextBlock({ block, data }: { block: PageBlock; data: CmsData }) {
   const asset = data.mediaAssets.find((item) => item.id === block.content.assetId);
-
   return (
     <section className="container content-section split-block panel">
       <div>
@@ -149,129 +163,94 @@ function ImageTextBlock({ block, data }: { block: PageBlock; data: CmsData }) {
         <h2>{stringValue(block.content.title, "Content")}</h2>
         <p>{stringValue(block.content.body)}</p>
       </div>
-      {asset?.publicUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={asset.publicUrl} alt={asset.altText ?? asset.title ?? ""} />
-      ) : (
-        <div className="image-placeholder">{stringValue(block.content.placeholder, "Media")}</div>
-      )}
+      {asset?.publicUrl ? <img src={asset.publicUrl} alt={asset.altText ?? asset.title ?? ""} /> : <div className="image-placeholder">{stringValue(block.content.placeholder, "Media")}</div>}
     </section>
   );
 }
 
 function StatCardsBlock({ block }: { block: PageBlock }) {
   const items = arrayValue<{ label: string; value: string }>(block.content.items);
-
-  return (
-    <section className="stat-band">
-      <div className="container stat-band__grid">
-        {items.map((item) => (
-          <article className="stat" key={`${item.label}-${item.value}`}>
-            <span>{item.label}</span>
-            <strong>{item.value}</strong>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
+  return <section className="stat-band"><div className="container stat-band__grid">{items.map((item) => <article className="stat" key={`${item.label}-${item.value}`}><span>{item.label}</span><strong>{item.value}</strong></article>)}</div></section>;
 }
 
-function TeamListBlock({ block, data }: { block: PageBlock; data: CmsData }) {
-  const seasonId = stringValue(block.content.seasonId);
+function TeamListBlock({ block, data, page }: { block: PageBlock; data: CmsData; page: PageRecord }) {
+  const seasonId = seasonIdFor(block, page, data);
   const limit = numberValue(block.content.limit);
-  const seasonTeams = data.seasonTeams
-    .filter((item) => !seasonId || item.seasonId === seasonId)
-    .sort((a, b) => (a.seed ?? 999) - (b.seed ?? 999));
-
-  const teams = seasonTeams
-    .map((seasonTeam) => ({
-      seasonTeam,
-      team: data.teams.find((item) => item.id === seasonTeam.teamId)
-    }))
-    .filter((item) => item.team)
-    .slice(0, limit);
+  const entries = getSeasonTeamEntries(data, seasonId).slice(0, limit);
 
   return (
     <section className="container content-section">
       <SectionTitle title={stringValue(block.content.title, "Teams")} />
       <div className="team-list">
-        {teams.map(({ team, seasonTeam }) => (
-          <article className="team-card" key={team!.id}>
+        {entries.map(({ team, seasonTeam }) => (
+          <article className="team-card" key={`${seasonTeam.seasonId}-${team.id}`}>
             <span className="team-card__seed">{String(seasonTeam.seed ?? "-").padStart(2, "0")}</span>
-            <span className="team-card__mark">{team!.logoText ?? team!.name.slice(0, 2)}</span>
+            <TeamMark data={data} team={team} seasonTeam={seasonTeam} />
             <span className="team-card__body">
-              <strong>{team!.name}</strong>
-              <small>{seasonTeam.status}</small>
+              <strong>{seasonTeam.displayName ?? team.name}</strong>
+              <small>{seasonTeam.tag ?? team.tag ?? team.slug} · {normalizeTeamStatus(seasonTeam.status)}</small>
             </span>
           </article>
         ))}
+        {!entries.length ? <p className="empty-copy">No teams have been added to this season yet.</p> : null}
       </div>
     </section>
   );
 }
 
-function MatchListBlock({ block, data }: { block: PageBlock; data: CmsData }) {
-  const seasonId = stringValue(block.content.seasonId);
+function MatchListBlock({ block, data, page }: { block: PageBlock; data: CmsData; page: PageRecord }) {
+  const seasonId = seasonIdFor(block, page, data);
   const limit = numberValue(block.content.limit);
-  const matches = data.matches
-    .filter((match) => !seasonId || match.seasonId === seasonId)
-    .slice(0, limit);
+  const matches = data.matches.filter((match) => match.seasonId === seasonId).slice(0, limit);
 
   return (
     <section className="container content-section">
       <SectionTitle title={stringValue(block.content.title, "Matches")} />
       <div className="schedule-grid">
-        {matches.map((match) => (
-          <MatchCard data={data} match={match} key={match.id} />
-        ))}
+        {matches.map((match) => <MatchCard data={data} match={match} key={match.id} />)}
       </div>
     </section>
   );
 }
 
 function MatchCard({ data, match }: { data: CmsData; match: MatchRecord }) {
-  const participants = data.matchParticipants
-    .filter((item) => item.matchId === match.id)
-    .sort((a, b) => a.slot - b.slot);
-  const teamA = data.teams.find((team) => team.id === participants[0]?.teamId);
-  const teamB = data.teams.find((team) => team.id === participants[1]?.teamId);
+  const participants = data.matchParticipants.filter((item) => item.matchId === match.id).sort((a, b) => a.slot - b.slot);
+  const seasonEntries = getSeasonTeamEntries(data, match.seasonId);
+  const teamA = seasonEntries.find((entry) => entry.team.id === participants[0]?.teamId);
+  const teamB = seasonEntries.find((entry) => entry.team.id === participants[1]?.teamId);
 
   return (
     <article className="match-card">
       <div className="match-card__meta">
-        <span>
-          <CalendarClock size={15} />
-          {match.startsAt
-            ? new Intl.DateTimeFormat("en", {
-                month: "short",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit"
-              }).format(new Date(match.startsAt))
-            : "TBD"}
-        </span>
+        <span><CalendarClock size={15} />{match.startsAt ? new Intl.DateTimeFormat("en", { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(new Date(match.startsAt)) : "TBD"}</span>
         <span>{match.status}</span>
       </div>
       <h3>{match.title}</h3>
       <div className="match-card__teams">
-        <strong>{teamA?.name ?? "TBD"}</strong>
+        <TeamSummary data={data} entry={teamA} fallback="TBD" />
         <span>vs</span>
-        <strong>{teamB?.name ?? "TBD"}</strong>
+        <TeamSummary data={data} entry={teamB} fallback="TBD" alignRight />
       </div>
-      {match.streamUrl ? (
-        <a className="inline-link" href={match.streamUrl}>
-          <ExternalLink size={15} />
-          Stream
-        </a>
-      ) : null}
+      {match.streamUrl ? <a className="inline-link" href={match.streamUrl}><ExternalLink size={15} />Stream</a> : null}
     </article>
   );
 }
 
-function BracketBlock({ block, data }: { block: PageBlock; data: CmsData }) {
+function TeamSummary({ data, entry, fallback, alignRight = false }: { data: CmsData; entry?: { seasonTeam: SeasonTeamRecord; team: TeamRecord }; fallback: string; alignRight?: boolean }) {
+  if (!entry) return <strong>{fallback}</strong>;
+  return (
+    <strong className={alignRight ? "team-summary right" : "team-summary"}>
+      <TeamMark data={data} team={entry.team} seasonTeam={entry.seasonTeam} />
+      {entry.seasonTeam.tag ?? entry.team.tag ?? entry.team.name}
+    </strong>
+  );
+}
+
+function BracketBlock({ block, data, page }: { block: PageBlock; data: CmsData; page: PageRecord }) {
+  const seasonId = seasonIdFor(block, page, data);
   const tournamentId = stringValue(block.content.tournamentId);
   const matches = data.matches
-    .filter((match) => match.tournamentId === tournamentId)
+    .filter((match) => (tournamentId ? match.tournamentId === tournamentId : match.seasonId === seasonId))
     .sort((a, b) => (a.bracketPosition ?? 0) - (b.bracketPosition ?? 0));
   const rounds = Array.from(new Set(matches.map((match) => match.roundLabel ?? "Round")));
 
@@ -282,34 +261,27 @@ function BracketBlock({ block, data }: { block: PageBlock; data: CmsData }) {
         {rounds.map((round) => (
           <section className="bracket-round" key={round}>
             <h2>{round}</h2>
-            {matches
-              .filter((match) => (match.roundLabel ?? "Round") === round)
-              .map((match) => (
-                <BracketMatch data={data} match={match} key={match.id} />
-              ))}
+            {matches.filter((match) => (match.roundLabel ?? "Round") === round).map((match) => <BracketMatch data={data} match={match} key={match.id} />)}
           </section>
         ))}
+        {!matches.length ? <p className="empty-copy">This season does not have bracket matches yet.</p> : null}
       </div>
     </section>
   );
 }
 
 function BracketMatch({ data, match }: { data: CmsData; match: MatchRecord }) {
-  const participants = [1, 2].map((slot) =>
-    data.matchParticipants.find(
-      (participant) => participant.matchId === match.id && participant.slot === slot
-    )
-  ) as Array<MatchParticipantRecord | undefined>;
+  const participants = [1, 2].map((slot) => data.matchParticipants.find((participant) => participant.matchId === match.id && participant.slot === slot)) as Array<MatchParticipantRecord | undefined>;
+  const seasonEntries = getSeasonTeamEntries(data, match.seasonId);
 
   return (
     <article className="bracket-match">
       {participants.map((participant, index) => {
-        const team = data.teams.find((item) => item.id === participant?.teamId);
-        const isWinner = Boolean(match.winnerTeamId && team?.id === match.winnerTeamId);
-
+        const entry = seasonEntries.find((item) => item.team.id === participant?.teamId);
+        const isWinner = Boolean(match.winnerTeamId && entry?.team.id === match.winnerTeamId);
         return (
           <div className={isWinner ? "winner" : ""} key={`${match.id}-${index}`}>
-            <span>{team?.name ?? "TBD"}</span>
+            <span>{entry ? <TeamSummary data={data} entry={entry} fallback="TBD" /> : "TBD"}</span>
             <strong>{participant?.score ?? "-"}</strong>
           </div>
         );
@@ -318,11 +290,9 @@ function BracketMatch({ data, match }: { data: CmsData; match: MatchRecord }) {
   );
 }
 
-function NewsListBlock({ block, data }: { block: PageBlock; data: CmsData }) {
-  const seasonId = stringValue(block.content.seasonId);
-  const posts = data.newsPosts.filter(
-    (post) => post.status === "published" && (!seasonId || post.seasonId === seasonId)
-  );
+function NewsListBlock({ block, data, page }: { block: PageBlock; data: CmsData; page: PageRecord }) {
+  const seasonId = seasonIdFor(block, page, data);
+  const posts = data.newsPosts.filter((post) => post.status === "published" && post.seasonId === seasonId);
 
   return (
     <section className="container content-section">
@@ -330,10 +300,7 @@ function NewsListBlock({ block, data }: { block: PageBlock; data: CmsData }) {
       <div className="news-grid">
         {posts.map((post) => (
           <Link href={post.href ?? `/news/${post.slug}`} className="news-card" key={post.id}>
-            <div className="news-card__meta">
-              <span>{post.category ?? "News"}</span>
-              <time>{post.publishedAt ? new Intl.DateTimeFormat("en").format(new Date(post.publishedAt)) : ""}</time>
-            </div>
+            <div className="news-card__meta"><span>{post.category ?? "News"}</span><time>{post.publishedAt ? new Intl.DateTimeFormat("en").format(new Date(post.publishedAt)) : ""}</time></div>
             <h3>{post.title}</h3>
             <p>{post.excerpt}</p>
           </Link>
@@ -343,38 +310,25 @@ function NewsListBlock({ block, data }: { block: PageBlock; data: CmsData }) {
   );
 }
 
-function RulesBlock({ block, data }: { block: PageBlock; data: CmsData }) {
-  const ruleset = data.rulesets.find((item) => item.id === block.content.rulesetId);
-  if (!ruleset) return null;
+function RulesBlock({ block, data, page }: { block: PageBlock; data: CmsData; page: PageRecord }) {
+  const seasonId = seasonIdFor(block, page, data);
+  const ruleset = stringValue(block.content.rulesetId)
+    ? data.rulesets.find((item) => item.id === block.content.rulesetId)
+    : data.rulesets.find((item) => item.seasonId === seasonId && item.status === "published") ?? data.rulesets.find((item) => item.seasonId === seasonId);
+  if (!ruleset) return <section className="container content-section"><article className="copy-block panel"><h2>Rules</h2><p>No rules have been published for this season yet.</p></article></section>;
 
-  return (
-    <section className="container content-section">
-      <article className="copy-block panel">
-        <h2>{ruleset.title}</h2>
-        <p>{ruleset.body}</p>
-      </article>
-    </section>
-  );
+  return <section className="container content-section"><article className="copy-block panel"><h2>{ruleset.title}</h2><p>{ruleset.body}</p></article></section>;
 }
 
-function SponsorStripBlock({ block, data }: { block: PageBlock; data: CmsData }) {
-  const seasonId = stringValue(block.content.seasonId);
-  const sponsors = data.sponsors
-    .filter((sponsor) => sponsor.isActive && (!seasonId || sponsor.seasonId === seasonId))
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+function SponsorStripBlock({ block, data, page }: { block: PageBlock; data: CmsData; page: PageRecord }) {
+  const seasonId = seasonIdFor(block, page, data);
+  const sponsors = data.sponsors.filter((sponsor) => sponsor.isActive && sponsor.seasonId === seasonId).sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
     <section className="sponsor-band">
       <div className="container sponsor-band__inner">
         <p className="section-kicker">{stringValue(block.content.title, "Sponsors")}</p>
-        <div>
-          {sponsors.map((sponsor) => (
-            <a href={sponsor.url ?? "#"} key={sponsor.id}>
-              <strong>{sponsor.logoText ?? sponsor.name.slice(0, 2)}</strong>
-              <span>{sponsor.name}</span>
-            </a>
-          ))}
-        </div>
+        <div>{sponsors.map((sponsor) => <a href={sponsor.url ?? "#"} key={sponsor.id}><strong>{sponsor.logoText ?? sponsor.name.slice(0, 2)}</strong><span>{sponsor.name}</span></a>)}</div>
       </div>
     </section>
   );
@@ -382,60 +336,25 @@ function SponsorStripBlock({ block, data }: { block: PageBlock; data: CmsData })
 
 function CtaBlock({ block }: { block: PageBlock }) {
   const href = stringValue(block.content.href, "#");
-
-  return (
-    <section className="container content-section">
-      <div className="cta-block panel">
-        <h2>{stringValue(block.content.title, "Next step")}</h2>
-        <p>{stringValue(block.content.body)}</p>
-        <Link className="button" href={href}>
-          {stringValue(block.content.label, "Open")}
-        </Link>
-      </div>
-    </section>
-  );
+  return <section className="container content-section"><div className="cta-block panel"><h2>{stringValue(block.content.title, "Next step")}</h2><p>{stringValue(block.content.body)}</p><Link className="button" href={href}>{stringValue(block.content.label, "Open")}</Link></div></section>;
 }
 
 function FaqBlock({ block }: { block: PageBlock }) {
   const items = arrayValue<{ question: string; answer: string }>(block.content.items);
-
-  return (
-    <section className="container content-section">
-      <SectionTitle title={stringValue(block.content.title, "FAQ")} />
-      <div className="faq-list">
-        {items.map((item) => (
-          <details className="panel" key={item.question}>
-            <summary>{item.question}</summary>
-            <p>{item.answer}</p>
-          </details>
-        ))}
-      </div>
-    </section>
-  );
+  return <section className="container content-section"><SectionTitle title={stringValue(block.content.title, "FAQ")} /><div className="faq-list">{items.map((item) => <details className="panel" key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</div></section>;
 }
+
 function SeasonListBlock({ block, data }: { block: PageBlock; data: CmsData }) {
   return (
     <section className="container content-section">
       <SectionTitle title={stringValue(block.content.title, "Seasons")} />
       <div className="season-grid">
-        {data.seasons
-          .filter((season) => season.status !== "deleted")
-          .map((season) => (
-            <Link className="season-card panel" href={`/seasons/${season.slug}`} key={season.id}>
-              <span className="status-pill">{season.status}</span>
-              <h2>{season.name}</h2>
-              <p>{season.summary}</p>
-            </Link>
-          ))}
+        {data.seasons.filter((season) => season.status !== "deleted").map((season) => <Link className="season-card panel" href={`/seasons/${season.slug}`} key={season.id}><span className="status-pill">{season.status}</span><h2>{season.name}</h2><p>{season.summary}</p></Link>)}
       </div>
     </section>
   );
 }
 
 function SectionTitle({ title }: { title: string }) {
-  return (
-    <div className="section-heading compact">
-      <h2>{title}</h2>
-    </div>
-  );
+  return <div className="section-heading compact"><h2>{title}</h2></div>;
 }
