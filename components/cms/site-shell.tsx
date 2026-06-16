@@ -25,13 +25,7 @@ export function SiteShell({
     <div className="theme-root" style={themeToStyle(theme.tokens)} data-page-id={page.id}>
       <header className="site-header">
         <div className="container site-header__inner">
-          <Link href="/" className="brand" aria-label={data.siteSettings.siteName}>
-            <span className="brand__mark">{data.siteSettings.logoText}</span>
-            <span className="brand__copy">
-              <strong>{data.siteSettings.logoText}</strong>
-              <small>{data.siteSettings.logoSubtext}</small>
-            </span>
-          </Link>
+          <Brand data={data} />
           <nav className="site-header__nav" aria-label="Primary navigation">
             {navigation.map((item) => (
               <Link href={item.href} key={item.id}>
@@ -48,16 +42,31 @@ export function SiteShell({
       <main>{children}</main>
       <footer className="site-footer">
         <div className="container site-footer__inner">
-          <div className="brand compact" aria-label={data.siteSettings.siteName}>
-            <span className="brand__mark">{data.siteSettings.logoText}</span>
-            <span className="brand__copy">
-              <strong>{data.siteSettings.logoText}</strong>
-              <small>{data.siteSettings.logoSubtext}</small>
-            </span>
-          </div>
+          <Brand data={data} compact />
           <p>{data.siteSettings.footerText}</p>
         </div>
       </footer>
     </div>
+  );
+}
+
+function Brand({ data, compact = false }: { data: CmsData; compact?: boolean }) {
+  const logoUrl = data.siteSettings.logoImageUrl || "/ams-logo.png";
+
+  return (
+    <Link href="/" className={compact ? "brand compact" : "brand"} aria-label={data.siteSettings.siteName}>
+      <span className="brand__mark">
+        {logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={logoUrl} alt={data.siteSettings.siteName} />
+        ) : (
+          data.siteSettings.logoText
+        )}
+      </span>
+      <span className="brand__copy">
+        <strong>{data.siteSettings.logoText}</strong>
+        <small>{data.siteSettings.logoSubtext}</small>
+      </span>
+    </Link>
   );
 }
