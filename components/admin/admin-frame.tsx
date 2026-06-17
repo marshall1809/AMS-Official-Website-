@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { AlertTriangle, ChevronDown, LogOut, Search, ShieldCheck } from "lucide-react";
 import { signOutAction } from "@/lib/auth/actions";
@@ -5,7 +6,7 @@ import { adminNavigation } from "@/lib/admin/navigation";
 import { summarizeAdminAccess, type AdminAccess } from "@/lib/admin/permissions";
 import styles from "@/components/admin/admin-shell.module.css";
 
-export function AdminFrame({ access, children }: { access: AdminAccess; children: React.ReactNode }) {
+export function AdminFrame({ access, children }: { access: AdminAccess; children: ReactNode }) {
   if (access.status !== "allowed") {
     return <AdminAccessBlocked access={access} />;
   }
