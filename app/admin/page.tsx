@@ -1,49 +1,16 @@
-import { AdminShell } from "@/components/admin-shell";
-import { AdminLogin } from "@/components/admin-login";
+import { AdminDashboard } from "@/components/admin/admin-page";
+import { getAdminDashboardStats } from "@/lib/admin/dashboard";
 import { createSupabaseServerClient } from "@/lib/auth/server";
-import { getCmsData } from "@/lib/cms/repository";
-import type { AppRole } from "@/lib/cms/types";
 
 export const metadata = {
-  title: "Admin"
+  title: "Dashboard | AMS Admin"
 };
 
-const writeRoles: AppRole[] = [
-  "super_admin",
-  "admin",
-  "designer",
-  "tournament_manager",
-  "content_manager",
-  "media_manager"
-];
+export const dynamic = "force-dynamic";
 
-export default async function AdminPage({
-  searchParams
-}: {
-  searchParams: Promise<{ auth?: string }>;
-}) {
-  const data = await getCmsData();
-  const hasSupabaseEnv = Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
-
-  if (!hasSupabaseEnv) {
-    return <AdminShell data={data} isWritable={false} sectionPath={[]} />;
-  }
-
+export default async function AdminDashboardPage() {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const stats = await getAdminDashboardStats(supabase);
 
-  if (!user) {
-    const params = await searchParams;
-    return <AdminLogin failed={params.auth === "failed"} />;
-  }
-
-  const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
-  const userRoles = new Set((roles ?? []).map((item) => item.role as AppRole));
-  const isWritable = writeRoles.some((role) => userRoles.has(role));
-
-  return <AdminShell data={data} isWritable={isWritable} sectionPath={[]} />;
+  return <AdminDashboard stats={stats} />;
 }
