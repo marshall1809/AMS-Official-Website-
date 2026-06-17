@@ -41,14 +41,15 @@ export async function requireAnyRole(roles: AppRole[]) {
   }
 
   const { data, error } = await supabase
-    .from("user_roles")
+    .from("user_role_assignments")
     .select("role")
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .eq("is_active", true);
 
   if (error) throw error;
 
   const userRoles = new Set((data ?? []).map((item) => item.role as AppRole));
-  if (userRoles.has("super_admin") || roles.some((role) => userRoles.has(role))) {
+  if (userRoles.has("super_admin") || userRoles.has("admin") || roles.some((role) => userRoles.has(role))) {
     return { supabase, user, roles: userRoles };
   }
 
