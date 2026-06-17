@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight, ClipboardList } from "lucide-react";
 import { adminDashboardCards, getAdminBreadcrumbs, type AdminNavItem } from "@/lib/admin/navigation";
@@ -22,7 +23,7 @@ export function AdminPageHeader({
           {getAdminBreadcrumbs(path).map((crumb, index, crumbs) => (
             <span key={`${crumb}-${index}`}>
               {crumb}
-              {index < crumbs.length - 1 ? <b>→</b> : null}
+              {index < crumbs.length - 1 ? <b>&gt;</b> : null}
             </span>
           ))}
         </nav>
@@ -108,7 +109,7 @@ export function AdminPlaceholderPage({ page }: { page: AdminNavItem & { group: s
   );
 }
 
-function AdminPanel({ title, href, children }: { title: string; href: string; children: React.ReactNode }) {
+function AdminPanel({ title, href, children }: { title: string; href: string; children: ReactNode }) {
   return (
     <article className={styles.panel}>
       <header>
