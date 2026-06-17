@@ -210,8 +210,31 @@ create policy public_read on public.match_participants for select using (public.
 drop policy if exists public_read on public.match_results;
 create policy public_read on public.match_results for select using (status = 'certified' and is_current = true and public.is_public_match(match_id));
 
+drop policy if exists public_read on public.snapshots;
+create policy public_read on public.snapshots for select using (
+  public.is_public_scope(scope, scope_id)
+  or exists (
+    select 1
+    from public.hall_of_fame_entry_snapshots hes
+    join public.hall_of_fame_entries h on h.id = hes.entry_id
+    where hes.snapshot_id = snapshots.id
+      and h.status = 'published'
+  )
+);
+
 drop policy if exists public_read on public.standings_cache;
-create policy public_read on public.standings_cache for select using (is_snapshot = true or public.is_public_stage(stage_id));
+create policy public_read on public.standings_cache for select using (
+  public.is_public_stage(stage_id)
+  or (
+    is_snapshot = true
+    and snapshot_id is not null
+    and exists (
+      select 1 from public.snapshots s
+      where s.id = standings_cache.snapshot_id
+        and public.is_public_scope(s.scope, s.scope_id)
+    )
+  )
+);
 
 drop policy if exists public_read on public.pages;
 create policy public_read on public.pages for select using (status = 'published' and public.is_public_scope(scope, scope_id));
@@ -277,6 +300,11 @@ with check (public.can_manage_scope(auth.uid(), 'manage_themes', scope, scope_id
 
 -- Season creation remains global; season updates/deletes can be scoped to that season.
 drop policy if exists seasons_manage on public.seasons;
+drop policy if exists seasons_read_admin on public.seasons;
+drop policy if exists seasons_insert_global on public.seasons;
+drop policy if exists seasons_update_scoped on public.seasons;
+drop policy if exists seasons_delete_global on public.seasons;
+
 create policy seasons_read_admin on public.seasons for select to authenticated
 using (public.has_capability(auth.uid(), 'view_admin') or public.can_manage_season(auth.uid(), id, 'manage_seasons'));
 create policy seasons_insert_global on public.seasons for insert to authenticated
