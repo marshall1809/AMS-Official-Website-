@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import { AdminAccessBlocked } from "@/components/admin/admin-frame";
 import { AdminPlaceholderPage } from "@/components/admin/admin-page";
+import { getAdminAccess } from "@/lib/admin/permissions";
 import { getAdminPageByPath } from "@/lib/admin/navigation";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +27,12 @@ export default async function AdminPathPage({ params }: AdminPathPageProps) {
 
   if (!page) {
     notFound();
+  }
+
+  const access = await getAdminAccess(page.requiredCapability ?? "view_admin");
+
+  if (access.status !== "allowed") {
+    return <AdminAccessBlocked access={access} />;
   }
 
   return <AdminPlaceholderPage page={page} />;
