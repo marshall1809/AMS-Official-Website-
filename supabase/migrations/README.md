@@ -16,6 +16,7 @@ Run these files in order on a fresh Supabase project.
 12. `012_indexes.sql`
 13. `013_rls_policies.sql`
 14. `014_seed_defaults.sql`
+15. `015_scoped_rls_hardening.sql`
 
 ## Important
 
@@ -24,3 +25,5 @@ This migration set is the hardened competition-first schema. It is safer than th
 Do not run this directly over the current production database without a migration/backup plan. For a clean Supabase project, run the files in the order above.
 
 Before running `014_seed_defaults.sql`, optionally replace the commented Super Admin UUID with your real `auth.users.id` and uncomment that block.
+
+`015_scoped_rls_hardening.sql` must be run after `013_rls_policies.sql`. It deliberately replaces selected baseline policies with stricter season/division/competition-aware rules.
