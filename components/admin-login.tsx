@@ -1,6 +1,6 @@
 import { signInFromFormAction } from "@/lib/auth/actions";
 
-export function AdminLogin({ failed }: { failed: boolean }) {
+export function AdminLogin({ failed, nextPath = "/admin" }: { failed: boolean; nextPath?: string }) {
   return (
     <div className="theme-root admin-theme">
       <main className="admin-login">
@@ -8,6 +8,7 @@ export function AdminLogin({ failed }: { failed: boolean }) {
           <p className="section-kicker">Admin Access</p>
           <h1>AMS Control</h1>
           <p>Sign in with a Supabase Auth account that has an assigned admin role.</p>
+          <input name="next" type="hidden" value={nextPath} />
           <label>
             Email
             <input name="email" type="email" required />
