@@ -29,7 +29,7 @@ for insert
 to authenticated
 with check (
   bucket_id = 'ams-media'
-  and public.has_capability(auth.uid(), 'manage_teams', 'global', null)
+  and public.has_capability(auth.uid(), 'manage_teams')
 );
 
 drop policy if exists ams_team_logo_update on storage.objects;
@@ -39,11 +39,11 @@ for update
 to authenticated
 using (
   bucket_id = 'ams-media'
-  and public.has_capability(auth.uid(), 'manage_teams', 'global', null)
+  and public.has_capability(auth.uid(), 'manage_teams')
 )
 with check (
   bucket_id = 'ams-media'
-  and public.has_capability(auth.uid(), 'manage_teams', 'global', null)
+  and public.has_capability(auth.uid(), 'manage_teams')
 );
 
 drop policy if exists team_logo_media_select on public.media_assets;
@@ -53,7 +53,7 @@ for select
 to authenticated
 using (
   scope = 'season'
-  and public.can_manage_season(auth.uid(), scope_id, 'manage_teams')
+  and public.has_capability(auth.uid(), 'manage_teams')
 );
 
 drop policy if exists team_logo_media_insert on public.media_assets;
@@ -63,7 +63,7 @@ for insert
 to authenticated
 with check (
   scope = 'season'
-  and public.can_manage_season(auth.uid(), scope_id, 'manage_teams')
+  and public.has_capability(auth.uid(), 'manage_teams')
 );
 
 drop policy if exists team_logo_media_update on public.media_assets;
@@ -73,9 +73,9 @@ for update
 to authenticated
 using (
   scope = 'season'
-  and public.can_manage_season(auth.uid(), scope_id, 'manage_teams')
+  and public.has_capability(auth.uid(), 'manage_teams')
 )
 with check (
   scope = 'season'
-  and public.can_manage_season(auth.uid(), scope_id, 'manage_teams')
+  and public.has_capability(auth.uid(), 'manage_teams')
 );
