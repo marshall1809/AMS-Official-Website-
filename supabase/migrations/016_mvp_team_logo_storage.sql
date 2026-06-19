@@ -7,18 +7,16 @@ language sql
 stable
 security definer
 set search_path = public
-as $
-  select exists (
-    select 1
-    from public.user_role_assignments assignment
-    where assignment.user_id = user_id_input
-      and assignment.is_active = true
-      and (
-        assignment.role::text in ('super_admin', 'admin')
-        or 'manage_teams' = any(coalesce(assignment.capabilities, '{}'::text[]))
-      )
-  );
-$;
+as 'select exists (
+  select 1
+  from public.user_role_assignments assignment
+  where assignment.user_id = user_id_input
+    and assignment.is_active = true
+    and (
+      assignment.role::text in (''super_admin'', ''admin'')
+      or ''manage_teams'' = any(coalesce(assignment.capabilities, ''{}''::text[]))
+    )
+)';
 
 grant execute on function public.ams_can_manage_teams(uuid) to authenticated;
 
