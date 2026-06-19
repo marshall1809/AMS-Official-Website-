@@ -17,6 +17,7 @@ Run these files in order on a fresh Supabase project.
 13. `013_rls_policies.sql`
 14. `014_seed_defaults.sql`
 15. `015_scoped_rls_hardening.sql`
+16. `016_mvp_team_logo_storage.sql`
 
 ## Important
 
@@ -27,3 +28,5 @@ Do not run this directly over the current production database without a migratio
 Before running `014_seed_defaults.sql`, optionally replace the commented Super Admin UUID with your real `auth.users.id` and uncomment that block.
 
 `015_scoped_rls_hardening.sql` must be run after `013_rls_policies.sql`. It deliberately replaces selected baseline policies with stricter season/division/competition-aware rules.
+
+`016_mvp_team_logo_storage.sql` creates the public `ams-media` bucket and the minimum authenticated policies required for Season team logos.
