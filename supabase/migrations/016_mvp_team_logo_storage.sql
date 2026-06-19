@@ -46,6 +46,16 @@ with check (
   and public.has_capability(auth.uid(), 'manage_teams', 'global', null)
 );
 
+drop policy if exists team_logo_media_select on public.media_assets;
+create policy team_logo_media_select
+on public.media_assets
+for select
+to authenticated
+using (
+  scope = 'season'
+  and public.can_manage_season(auth.uid(), scope_id, 'manage_teams')
+);
+
 drop policy if exists team_logo_media_insert on public.media_assets;
 create policy team_logo_media_insert
 on public.media_assets
