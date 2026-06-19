@@ -24,6 +24,16 @@ create table if not exists public.user_role_assignments (
   )
 );
 
+alter table public.user_role_assignments
+  add column if not exists id uuid default gen_random_uuid(),
+  add column if not exists scope public.scope_type not null default 'global',
+  add column if not exists scope_id uuid,
+  add column if not exists capabilities text[] not null default '{}',
+  add column if not exists is_active boolean not null default true,
+  add column if not exists created_by uuid references auth.users(id) on delete set null,
+  add column if not exists created_at timestamptz not null default now(),
+  add column if not exists updated_at timestamptz not null default now();
+
 create unique index if not exists user_role_global_unique
   on public.user_role_assignments(user_id, role, scope)
   where scope = 'global';
@@ -92,6 +102,20 @@ as 'select exists (
 )';
 
 grant execute on function public.ams_can_manage_teams(uuid) to authenticated;
+
+do 'begin
+  create type public.media_state as enum (''active'',''replaced'',''archived'',''unused'',''protected'',''soft_deleted'');
+exception when duplicate_object then null;
+end';
+
+alter table if exists public.media_assets
+  add column if not exists size_bytes bigint,
+  add column if not exists state public.media_state not null default 'active',
+  add column if not exists scope public.scope_type not null default 'global',
+  add column if not exists scope_id uuid,
+  add column if not exists uploaded_by uuid references auth.users(id) on delete set null,
+  add column if not exists metadata jsonb not null default '{}'::jsonb,
+  add column if not exists updated_at timestamptz not null default now();
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
