@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AdminAccessBlocked } from "@/components/admin/admin-frame";
 import { AdminPageHeader } from "@/components/admin/admin-page";
+import adminStyles from "@/components/admin/admin-shell.module.css";
 import teamStyles from "@/components/admin/team-manager.module.css";
 import { requireAdminAccess } from "@/lib/admin/permissions";
 import {
@@ -144,7 +145,7 @@ export default async function TeamManagerPage({
     .filter((row): row is NonNullable<typeof row> => Boolean(row));
 
   return (
-    <div className="page-stack">
+    <div className={adminStyles.pageStack}>
       <AdminPageHeader
         path="/admin/competition/teams"
         title="Teams"
