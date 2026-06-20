@@ -2,6 +2,11 @@
 -- Minimum schema bridge for one Season-scoped single-elimination competition.
 
 do 'begin
+  create type public.participation_status as enum (''active'',''inactive'',''eliminated'',''promoted'',''relegated'',''archived'');
+exception when duplicate_object then null;
+end';
+
+do 'begin
   create type public.competition_status as enum (''draft'',''generated'',''ready'',''active'',''locked'',''finalized'',''archived'',''deleted'');
 exception when duplicate_object then null;
 end';
