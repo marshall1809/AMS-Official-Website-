@@ -105,6 +105,7 @@ alter table if exists public.matches
   add column if not exists season_id uuid references public.seasons(id) on delete restrict,
   add column if not exists competition_id uuid references public.competitions(id) on delete restrict,
   add column if not exists round_id uuid references public.stage_rounds(id) on delete set null,
+  add column if not exists round_label text,
   add column if not exists bracket_position integer,
   add column if not exists updated_at timestamptz not null default now();
 
