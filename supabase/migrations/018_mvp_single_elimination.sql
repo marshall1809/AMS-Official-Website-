@@ -47,6 +47,15 @@ create table if not exists public.competitions (
 create unique index if not exists competitions_division_slug_mvp_unique
   on public.competitions(division_id, slug);
 
+do 'begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = ''public'' and table_name = ''stages'' and column_name = ''tournament_id''
+  ) then
+    execute ''alter table public.stages alter column tournament_id drop not null'';
+  end if;
+end';
+
 alter table if exists public.stages
   add column if not exists competition_id uuid references public.competitions(id) on delete restrict,
   add column if not exists slug text,
@@ -93,12 +102,14 @@ create unique index if not exists competition_entries_mvp_unique
   on public.competition_entries(competition_id, division_team_id);
 
 alter table if exists public.matches
+  add column if not exists season_id uuid references public.seasons(id) on delete restrict,
   add column if not exists competition_id uuid references public.competitions(id) on delete restrict,
   add column if not exists round_id uuid references public.stage_rounds(id) on delete set null,
   add column if not exists bracket_position integer,
   add column if not exists updated_at timestamptz not null default now();
 
 alter table if exists public.match_participants
+  add column if not exists team_id uuid references public.teams(id) on delete restrict,
   add column if not exists competition_entry_id uuid references public.competition_entries(id) on delete restrict,
   add column if not exists source_type text not null default 'manual',
   add column if not exists source_match_id uuid references public.matches(id) on delete set null,
