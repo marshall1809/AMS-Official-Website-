@@ -164,7 +164,9 @@ export async function updateTeamAction(formData: FormData) {
   const { error: updateTeamError } = await supabase
     .from("teams")
     .update({
+      name,
       canonical_name: name,
+      tag: tag || null,
       description: summary || null,
       current_version_id: nextVersion.id,
       updated_at: new Date().toISOString()
@@ -201,24 +203,20 @@ export async function removeTeamFromSeasonAction(formData: FormData) {
 
   if (!seasonTeamId) fail("invalid-participation");
 
-  const { count, error: usageError } = await supabase
-    .from("division_teams")
-    .select("id", { count: "exact", head: true })
-    .eq("season_team_id", seasonTeamId);
+  const { error: deleteError } = await supabase
+    .from("season_teams")
+    .delete()
+    .eq("id", seasonTeamId);
 
-  if (usageError) fail(usageError.message);
+  if (!deleteError) finish("removed");
 
-  const query = count
-    ? supabase
-        .from("season_teams")
-        .update({ status: "archived", updated_at: new Date().toISOString() })
-        .eq("id", seasonTeamId)
-    : supabase.from("season_teams").delete().eq("id", seasonTeamId);
+  const { error: archiveError } = await supabase
+    .from("season_teams")
+    .update({ status: "archived", updated_at: new Date().toISOString() })
+    .eq("id", seasonTeamId);
 
-  const { error } = await query;
-  if (error) fail(error.message);
-
-  finish(count ? "archived" : "removed");
+  if (archiveError) fail(archiveError.message);
+  finish("archived");
 }
 
 async function uploadTeamLogo(
