@@ -8,6 +8,7 @@ end';
 
 alter table if exists public.teams
   add column if not exists name text,
+  add column if not exists tag text,
   add column if not exists canonical_name text,
   add column if not exists current_version_id uuid,
   add column if not exists description text,
