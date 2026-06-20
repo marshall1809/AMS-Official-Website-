@@ -131,3 +131,35 @@
   color: #8ea0ba;
   font: 0.86rem Arial, Helvetica, sans-serif;
 }
+
+
+.scheduleLink {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  color: #d7bb63;
+  font: 800 0.76rem Arial, Helvetica, sans-serif;
+  text-decoration: none;
+}
+
+.scheduleLink:hover {
+  color: #f6df8d;
+  text-decoration: underline;
+}
+
+.matchupEditor {
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+  padding-top: 10px;
+}
+
+.matchupEditor summary {
+  color: #d7bb63;
+  cursor: pointer;
+  font: 800 0.78rem Arial, Helvetica, sans-serif;
+}
+
+.helper {
+  margin: 0;
+  color: #8ea0ba;
+  font: 0.76rem/1.5 Arial, Helvetica, sans-serif;
+}

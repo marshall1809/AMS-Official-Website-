@@ -190,6 +190,146 @@ export async function createSingleEliminationAction(formData: FormData) {
   finish("created");
 }
 
+export async function updateFirstRoundMatchupAction(formData: FormData) {
+  const { supabase } = await requireBracketAccess();
+  const matchId = field(formData, "matchId");
+  const entryOneId = field(formData, "entryOneId");
+  const entryTwoId = field(formData, "entryTwoId");
+
+  if (!matchId || !entryOneId || !entryTwoId || entryOneId === entryTwoId) {
+    fail("select-two-different-teams");
+  }
+
+  const { data: match, error: matchError } = await supabase
+    .from("matches")
+    .select("id, stage_id, round_id, status")
+    .eq("id", matchId)
+    .single();
+
+  if (matchError || !match) fail(matchError?.message ?? "match-not-found");
+  if (match.status !== "scheduled") fail("only-scheduled-matchups-can-be-changed");
+
+  const { data: firstRound, error: roundError } = await supabase
+    .from("stage_rounds")
+    .select("id")
+    .eq("stage_id", match.stage_id)
+    .order("sort_order", { ascending: true })
+    .limit(1)
+    .single();
+
+  if (roundError || !firstRound) fail(roundError?.message ?? "first-round-not-found");
+  if (match.round_id !== firstRound.id) fail("only-first-round-matchups-can-be-changed");
+
+  const { data: firstRoundMatches, error: matchesError } = await supabase
+    .from("matches")
+    .select("id, status")
+    .eq("stage_id", match.stage_id)
+    .eq("round_id", firstRound.id);
+
+  if (matchesError || !firstRoundMatches?.length) {
+    fail(matchesError?.message ?? "first-round-matches-not-found");
+  }
+
+  const firstRoundMatchIds = firstRoundMatches.map((item) => item.id);
+  const { data: participants, error: participantsError } = await supabase
+    .from("match_participants")
+    .select("id, match_id, team_id, competition_entry_id, slot, source_type")
+    .in("match_id", firstRoundMatchIds)
+    .eq("source_type", "seed");
+
+  if (participantsError) fail(participantsError.message);
+
+  const targetOne = participants?.find(
+    (participant) => participant.match_id === matchId && participant.slot === 1
+  );
+  const targetTwo = participants?.find(
+    (participant) => participant.match_id === matchId && participant.slot === 2
+  );
+  const selectedOne = participants?.find(
+    (participant) => participant.competition_entry_id === entryOneId
+  );
+  const selectedTwo = participants?.find(
+    (participant) => participant.competition_entry_id === entryTwoId
+  );
+
+  if (!targetOne || !targetTwo || !selectedOne || !selectedTwo) {
+    fail("selected-team-is-not-in-this-bracket");
+  }
+
+  const affected = Array.from(
+    new Map(
+      [targetOne, targetTwo, selectedOne, selectedTwo].map((participant) => [
+        participant.id,
+        participant
+      ])
+    ).values()
+  );
+  const affectedMatchIds = Array.from(
+    new Set(affected.map((participant) => participant.match_id))
+  );
+  const affectedMatches = firstRoundMatches.filter((item) =>
+    affectedMatchIds.includes(item.id)
+  );
+
+  if (affectedMatches.some((item) => item.status !== "scheduled")) {
+    fail("a-selected-team-already-has-a-started-match");
+  }
+
+  const { data: existingResults, error: resultsError } = await supabase
+    .from("match_results")
+    .select("id")
+    .in("match_id", affectedMatchIds)
+    .eq("is_current", true)
+    .limit(1);
+
+  if (resultsError) fail(resultsError.message);
+  if (existingResults?.length) fail("a-selected-team-already-has-a-result");
+
+  const selectedEntryIds = new Set([entryOneId, entryTwoId]);
+  const remainingRecords = affected.filter(
+    (participant) => participant.id !== targetOne.id && participant.id !== targetTwo.id
+  );
+  const remainingValues = affected.filter(
+    (participant) =>
+      typeof participant.competition_entry_id === "string" &&
+      !selectedEntryIds.has(participant.competition_entry_id)
+  );
+  const assignments = [
+    { record: targetOne, value: selectedOne },
+    { record: targetTwo, value: selectedTwo },
+    ...remainingRecords.map((record, index) => ({
+      record,
+      value: remainingValues[index]
+    }))
+  ];
+
+  if (
+    assignments.some(
+      ({ value }) => !value?.team_id || !value?.competition_entry_id
+    )
+  ) {
+    fail("matchup-swap-could-not-be-resolved");
+  }
+
+  for (const { record, value } of assignments) {
+    const { error } = await supabase
+      .from("match_participants")
+      .update({
+        team_id: value!.team_id,
+        competition_entry_id: value!.competition_entry_id,
+        source_type: "seed",
+        source_match_id: null,
+        source_outcome: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", record.id);
+
+    if (error) fail(error.message);
+  }
+
+  finish("matchup");
+}
+
 export async function certifyMatchWinnerAction(formData: FormData) {
   const { supabase, userId } = await requireBracketAccess();
   const matchId = field(formData, "matchId");

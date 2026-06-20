@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { updateMatchScheduleAction } from "@/lib/admin/match-actions";
 import styles from "@/components/admin/match-schedule.module.css";
 
@@ -17,7 +18,7 @@ export type ScheduleMatch = {
 
 export function MatchScheduleEditor({ match }: { match: ScheduleMatch }) {
   return (
-    <article className={styles.card}>
+    <article className={styles.card} id={`match-${match.id}`}>
       <div className={styles.identity}>
         <small>{match.roundLabel ?? "Match"}</small>
         <strong>{match.teams.length ? match.teams.join(" vs ") : match.title}</strong>
@@ -28,8 +29,12 @@ export function MatchScheduleEditor({ match }: { match: ScheduleMatch }) {
         <span>{match.startsAt ? formatDisplayDate(match.startsAt) : "Date not scheduled"}</span>
       </div>
 
-      <details className={styles.edit}>
-        <summary>Bearbeiten</summary>
+      <div className={styles.cardActions}>
+        <Link href={`/admin/competition/brackets#match-${match.id}`}>
+          Open in bracket
+        </Link>
+        <details className={styles.edit}>
+          <summary>Edit schedule</summary>
         <form action={updateMatchScheduleAction} className={styles.form}>
           <input name="matchId" type="hidden" value={match.id} />
           <input name="timezoneOffset" type="hidden" value={new Date().getTimezoneOffset()} />
@@ -76,8 +81,9 @@ export function MatchScheduleEditor({ match }: { match: ScheduleMatch }) {
           <button className={styles.primary} type="submit">
             Save schedule
           </button>
-        </form>
-      </details>
+          </form>
+        </details>
+      </div>
     </article>
   );
 }

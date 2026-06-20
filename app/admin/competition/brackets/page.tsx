@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AdminAccessBlocked } from "@/components/admin/admin-frame";
 import { AdminPageHeader } from "@/components/admin/admin-page";
 import adminStyles from "@/components/admin/admin-shell.module.css";
@@ -5,7 +6,8 @@ import bracketStyles from "@/components/admin/bracket-manager.module.css";
 import { requireAdminAccess } from "@/lib/admin/permissions";
 import {
   certifyMatchWinnerAction,
-  createSingleEliminationAction
+  createSingleEliminationAction,
+  updateFirstRoundMatchupAction
 } from "@/lib/admin/bracket-actions";
 import { createSupabaseServerClient } from "@/lib/auth/server";
 
@@ -126,7 +128,7 @@ export default async function BracketManagerPage({
     ? await rows(
         supabase
           .from("match_participants")
-          .select("id, match_id, team_id, slot")
+          .select("id, match_id, team_id, competition_entry_id, slot, source_type")
           .in("match_id", matchIds)
           .order("slot")
       )
@@ -162,6 +164,17 @@ export default async function BracketManagerPage({
           .in("id", versionIds)
       )
     : [];
+  const firstRoundId = rounds[0]?.id;
+  const entryOptions = participants.filter(
+    (participant, index, all) =>
+      participant.source_type === "seed" &&
+      typeof participant.competition_entry_id === "string" &&
+      typeof participant.team_id === "string" &&
+      all.findIndex(
+        (candidate) =>
+          candidate.competition_entry_id === participant.competition_entry_id
+      ) === index
+  );
 
   return (
     <div className={adminStyles.pageStack}>
@@ -184,9 +197,17 @@ export default async function BracketManagerPage({
                 );
                 const result = results.find((item) => item.match_id === match.id);
                 const score = (result?.score ?? {}) as Record<string, number>;
+                const firstParticipant = matchParticipants.find((item) => item.slot === 1);
+                const secondParticipant = matchParticipants.find((item) => item.slot === 2);
+                const canEditMatchup =
+                  match.round_id === firstRoundId &&
+                  match.status === "scheduled" &&
+                  !result &&
+                  Boolean(firstParticipant?.competition_entry_id) &&
+                  Boolean(secondParticipant?.competition_entry_id);
 
                 return (
-                  <article className={bracketStyles.match} key={match.id}>
+                  <article className={bracketStyles.match} id={`match-${match.id}`} key={match.id}>
                     <header>
                       <span>{String(match.title)}</span>
                       <span>{String(match.status)}</span>
@@ -209,6 +230,63 @@ export default async function BracketManagerPage({
                         </div>
                       );
                     })}
+
+                    <Link
+                      className={bracketStyles.scheduleLink}
+                      href={`/admin/competition/schedule#match-${match.id}`}
+                    >
+                      Open this match in Schedule
+                    </Link>
+
+                    {canEditMatchup ? (
+                      <details className={bracketStyles.matchupEditor}>
+                        <summary>Change opponents</summary>
+                        <form action={updateFirstRoundMatchupAction} className={bracketStyles.form}>
+                          <input name="matchId" type="hidden" value={match.id} />
+                          <label>
+                            Opponent 1
+                            <select
+                              name="entryOneId"
+                              defaultValue={String(firstParticipant?.competition_entry_id)}
+                              required
+                            >
+                              {entryOptions.map((participant) => (
+                                <option
+                                  value={String(participant.competition_entry_id)}
+                                  key={String(participant.competition_entry_id)}
+                                >
+                                  {teamName(participant.team_id, teams, versions)}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <label>
+                            Opponent 2
+                            <select
+                              name="entryTwoId"
+                              defaultValue={String(secondParticipant?.competition_entry_id)}
+                              required
+                            >
+                              {entryOptions.map((participant) => (
+                                <option
+                                  value={String(participant.competition_entry_id)}
+                                  key={String(participant.competition_entry_id)}
+                                >
+                                  {teamName(participant.team_id, teams, versions)}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <p className={bracketStyles.helper}>
+                            Selecting a team from another first-round match swaps the displaced team
+                            into the freed position.
+                          </p>
+                          <button className={bracketStyles.primary} type="submit">
+                            Save matchup
+                          </button>
+                        </form>
+                      </details>
+                    ) : null}
 
                     {!result && matchParticipants.length === 2 ? (
                       <form action={certifyMatchWinnerAction} className={bracketStyles.form}>
@@ -295,6 +373,8 @@ function teamName(teamId: unknown, teams: Row[], versions: Row[]) {
 function getFeedback(params: Record<string, string | string[] | undefined>) {
   if (params.created === "1") return "Single Elimination bracket created.";
   if (params.result === "1") return "Result certified and winner advanced.";
+  if (params.matchup === "1") return "First-round matchup updated. Schedule uses the same match.";
+
   if (typeof params.error === "string") return `Action failed: ${params.error}`;
   return null;
 }
