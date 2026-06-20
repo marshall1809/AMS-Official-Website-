@@ -19,6 +19,7 @@ Run these files in order on a fresh Supabase project.
 15. `015_scoped_rls_hardening.sql`
 16. `016_mvp_team_logo_storage.sql`
 17. `017_mvp_legacy_team_bridge.sql`
+18. `018_mvp_single_elimination.sql`
 
 ## Important
 
@@ -33,3 +34,5 @@ Before running `014_seed_defaults.sql`, optionally replace the commented Super A
 `016_mvp_team_logo_storage.sql` creates the public `ams-media` bucket and the minimum authenticated policies required for Season team logos.
 
 `017_mvp_legacy_team_bridge.sql` adapts legacy Team and Season participation columns for the MVP Team Manager.
+
+`018_mvp_single_elimination.sql` adds the launch-only Single Elimination bracket tables and policies.
