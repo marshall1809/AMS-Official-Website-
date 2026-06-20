@@ -1,0 +1,133 @@
+.setup,
+.round,
+.match {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(13, 25, 48, 0.94), rgba(8, 15, 29, 0.98));
+}
+
+.setup {
+  max-width: 620px;
+  padding: 22px;
+}
+
+.setup h2,
+.round h2 {
+  margin: 0;
+  color: #f7f0dc;
+}
+
+.setup p {
+  color: #aeb9ca;
+  line-height: 1.55;
+}
+
+.form {
+  display: grid;
+  gap: 13px;
+  margin-top: 18px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.form label {
+  display: grid;
+  gap: 7px;
+  color: #dce4f0;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.form input,
+.form select {
+  width: 100%;
+  border: 1px solid rgba(201, 168, 76, 0.26);
+  border-radius: 6px;
+  background: #040a15;
+  color: #eef3fb;
+  padding: 10px 11px;
+}
+
+.primary {
+  min-height: 40px;
+  border: 0;
+  border-radius: 6px;
+  background: #c9a84c;
+  color: #07101d;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 0 14px;
+}
+
+.feedback {
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  border-radius: 7px;
+  background: rgba(201, 168, 76, 0.1);
+  color: #f6df8d;
+  padding: 12px 14px;
+}
+
+.bracket {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(290px, 1fr);
+  gap: 18px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+}
+
+.round {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 18px;
+}
+
+.round h2 {
+  font-size: 1.2rem;
+}
+
+.match {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.match header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #8ea0ba;
+  font: 0.76rem Arial, Helvetica, sans-serif;
+}
+
+.participant {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.13);
+  border-radius: 6px;
+  background: rgba(3, 8, 18, 0.6);
+  padding: 9px 11px;
+}
+
+.participant strong {
+  color: #eef3fb;
+}
+
+.winner {
+  border-color: rgba(201, 168, 76, 0.55);
+  background: rgba(201, 168, 76, 0.1);
+}
+
+.scoreGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.empty {
+  color: #8ea0ba;
+  font: 0.86rem Arial, Helvetica, sans-serif;
+}
