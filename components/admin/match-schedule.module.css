@@ -1,0 +1,167 @@
+.toolbar,
+.card,
+.empty {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(13, 25, 48, 0.94), rgba(8, 15, 29, 0.98));
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.toolbar span {
+  color: #aeb9ca;
+  font: 0.85rem Arial, Helvetica, sans-serif;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.2fr) minmax(180px, 0.8fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 16px;
+}
+
+.identity {
+  display: grid;
+  gap: 5px;
+}
+
+.identity small,
+.meta small {
+  color: #8ea0ba;
+  font: 0.72rem Arial, Helvetica, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.identity strong {
+  color: #eef3fb;
+}
+
+.meta {
+  display: grid;
+  gap: 5px;
+  color: #c6d1e4;
+  font: 0.86rem Arial, Helvetica, sans-serif;
+}
+
+.edit summary {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  border-radius: 6px;
+  color: #e5cb76;
+  cursor: pointer;
+  font: 800 0.78rem Arial, Helvetica, sans-serif;
+  padding: 0 13px;
+}
+
+.form {
+  position: absolute;
+  z-index: 20;
+  right: 30px;
+  display: grid;
+  width: min(520px, calc(100vw - 48px));
+  gap: 13px;
+  margin-top: 8px;
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-radius: 8px;
+  background: #07101f;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48);
+  padding: 18px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.form label {
+  display: grid;
+  gap: 6px;
+  color: #dce4f0;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.form input,
+.form select,
+.form textarea {
+  width: 100%;
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  border-radius: 6px;
+  background: #030914;
+  color: #eef3fb;
+  padding: 10px 11px;
+}
+
+.form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.checkbox {
+  display: flex !important;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.checkbox input {
+  width: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.primary {
+  min-height: 40px;
+  border: 0;
+  border-radius: 6px;
+  background: #c9a84c;
+  color: #07101d;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.feedback {
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  border-radius: 7px;
+  background: rgba(201, 168, 76, 0.1);
+  color: #f6df8d;
+  padding: 12px 14px;
+}
+
+.empty {
+  color: #aeb9ca;
+  padding: 28px;
+  text-align: center;
+}
+
+@media (max-width: 850px) {
+  .card {
+    grid-template-columns: 1fr;
+  }
+
+  .form {
+    position: fixed;
+    inset: 20px;
+    width: auto;
+    overflow-y: auto;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
