@@ -122,6 +122,12 @@ alter table if exists public.match_participants
   add column if not exists source_outcome text,
   add column if not exists updated_at timestamptz not null default now();
 
+alter table if exists public.match_participants
+  add column if not exists id uuid default gen_random_uuid();
+
+create unique index if not exists match_participants_id_mvp_unique
+  on public.match_participants(id);
+
 create table if not exists public.match_results (
   id uuid primary key default gen_random_uuid(),
   match_id uuid not null references public.matches(id) on delete restrict,
@@ -137,6 +143,33 @@ create table if not exists public.match_results (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table if exists public.match_results
+  add column if not exists revision integer not null default 1,
+  add column if not exists is_current boolean not null default false,
+  add column if not exists winner_participant_id uuid,
+  add column if not exists status public.result_status not null default 'submitted',
+  add column if not exists score jsonb not null default '{}'::jsonb,
+  add column if not exists result_notes text,
+  add column if not exists certified_by uuid references auth.users(id) on delete set null,
+  add column if not exists certified_at timestamptz,
+  add column if not exists created_by uuid references auth.users(id) on delete set null,
+  add column if not exists created_at timestamptz not null default now(),
+  add column if not exists updated_at timestamptz not null default now();
+
+with ranked_results as (
+  select
+    id,
+    row_number() over (
+      partition by match_id
+      order by created_at desc, id desc
+    ) as revision_rank
+  from public.match_results
+)
+update public.match_results result
+set is_current = ranked.revision_rank = 1
+from ranked_results ranked
+where result.id = ranked.id;
 
 create unique index if not exists match_results_current_mvp_unique
   on public.match_results(match_id)
