@@ -26,7 +26,6 @@ export async function createTeamAction(formData: FormData) {
     .insert({
       canonical_name: name,
       slug,
-      status: "published",
       description: summary || null,
       socials: {}
     })
