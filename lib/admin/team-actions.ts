@@ -24,6 +24,7 @@ export async function createTeamAction(formData: FormData) {
   const { data: team, error: teamError } = await supabase
     .from("teams")
     .insert({
+      name,
       canonical_name: name,
       slug,
       description: summary || null,
