@@ -7,6 +7,7 @@ exception when duplicate_object then null;
 end';
 
 alter table if exists public.teams
+  add column if not exists name text,
   add column if not exists canonical_name text,
   add column if not exists current_version_id uuid,
   add column if not exists description text,
@@ -16,6 +17,11 @@ alter table if exists public.teams
 
 update public.teams team
 set
+  name = coalesce(
+    nullif(team.name, ''),
+    nullif(team.canonical_name, ''),
+    team.slug
+  ),
   canonical_name = coalesce(
     nullif(team.canonical_name, ''),
     nullif(to_jsonb(team)->>'name', ''),
@@ -31,6 +37,7 @@ where team.canonical_name is null
    or team.socials = '{}'::jsonb;
 
 alter table if exists public.teams
+  alter column name set not null,
   alter column canonical_name set not null;
 
 create table if not exists public.team_versions (
