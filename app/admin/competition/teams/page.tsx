@@ -199,8 +199,9 @@ export default async function TeamManagerPage({
                       <td>{participation.status}</td>
                       <td>{participation.seed ?? "-"}</td>
                       <td>
-                        <details className={teamStyles.details}>
-                          <summary>Edit</summary>
+                        <div className={teamStyles.rowActions}>
+                          <details className={teamStyles.details}>
+                            <summary className={teamStyles.secondary}>Bearbeiten</summary>
                           <div className={teamStyles.editor}>
                             <form
                               action={updateTeamAction}
@@ -246,14 +247,15 @@ export default async function TeamManagerPage({
                               </button>
                             </form>
 
-                            <form action={removeTeamFromSeasonAction}>
-                              <input name="seasonTeamId" type="hidden" value={participation.id} />
-                              <button className={teamStyles.danger} type="submit">
-                                Remove from Season
-                              </button>
-                            </form>
                           </div>
-                        </details>
+                          </details>
+                          <form action={removeTeamFromSeasonAction}>
+                            <input name="seasonTeamId" type="hidden" value={participation.id} />
+                            <button className={teamStyles.danger} type="submit">
+                              Entfernen
+                            </button>
+                          </form>
+                        </div>
                       </td>
                     </tr>
                   ))}
