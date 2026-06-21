@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BracketExportButton } from "@/components/cms/bracket-export-button";
 import { SiteShell } from "@/components/cms/site-shell";
 import { defaultCmsData } from "@/lib/cms/default-data";
 import { mergeThemes } from "@/lib/cms/theme";
@@ -100,13 +101,21 @@ export function PublicBracketPage({
       <section className="container content-section public-bracket-section">
         <div className="competition-toolbar">
           <span>{matches.length} knockout matches across {rounds.length} rounds</span>
-          <Link className="button secondary" href={scheduleHref}>
-            View schedule
-          </Link>
+          <div className="competition-toolbar__actions">
+            <BracketExportButton />
+            <Link className="button secondary" href={scheduleHref}>
+              View schedule
+            </Link>
+          </div>
         </div>
 
         {matches.length ? (
-          isMirroredEightTeamBracket ? (
+          <div className="public-bracket-export">
+            <div className="public-bracket-print-header">
+              <span>{season?.name ?? "Alliance Master Series"}</span>
+              <strong>Knockout Bracket</strong>
+            </div>
+            {isMirroredEightTeamBracket ? (
             <MirroredEightTeamBracket
               data={data}
               finalMatch={matchesByRound[2][0]}
@@ -168,7 +177,8 @@ export function PublicBracketPage({
                 })}
               </div>
             </div>
-          )
+          )}
+          </div>
         ) : (
           <CompetitionEmpty text="The knockout bracket has not been generated yet." />
         )}
