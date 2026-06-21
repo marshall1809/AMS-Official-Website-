@@ -31,7 +31,7 @@ export function PublicHomepage({ data }: { data: CmsData }) {
             id: "live-home-announcement",
             type: "announcement" as const,
             sortOrder: 1,
-            content: { text: `${season.name} is ${season.status}. Follow schedules and results live on AMS.` }
+            content: { text: `${season.name} is ${season.status}. Follow the bracket and results live on AMS.` }
           }
         ]
       : []),
