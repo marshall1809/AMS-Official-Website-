@@ -1769,3 +1769,125 @@ textarea {
     padding: 12px 0;
   }
 }
+
+
+.competition-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.bracket-export-button {
+  gap: 7px;
+}
+
+.public-bracket-print-header {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    margin: 0;
+    background: #050b16 !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .public-bracket-export,
+  .public-bracket-export * {
+    visibility: visible !important;
+  }
+
+  .public-bracket-export {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    color: var(--color-text);
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .public-bracket-print-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    border-bottom: 2px solid var(--color-accent);
+    padding: 0 2px 12px;
+    color: var(--color-text);
+  }
+
+  .public-bracket-print-header span {
+    color: var(--color-accent);
+    font: 800 10pt var(--font-body);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .public-bracket-print-header strong {
+    font: 700 22pt var(--font-display);
+  }
+
+  .public-bracket-shell {
+    overflow: visible;
+    margin-top: 12px;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .public-bracket-mirrored {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: 1fr 0.82fr 0.95fr 0.82fr 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .public-bracket-mirror-column {
+    grid-template-rows: 32px 270px;
+  }
+
+  .public-bracket-mirror-column > h2 {
+    font-size: 6.5pt;
+  }
+
+  .public-bracket-mirror-column > h2 small {
+    font-size: 5pt;
+  }
+
+  .public-bracket {
+    width: 100%;
+    min-width: 0;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .public-bracket-round__matches {
+    height: calc(var(--bracket-slots) * 92px);
+    grid-template-rows: repeat(var(--bracket-slots), minmax(92px, 1fr));
+  }
+
+  .public-bracket-match {
+    box-shadow: none;
+  }
+
+  .public-bracket-match > header span,
+  .public-bracket-team .public-match-team__name,
+  .public-bracket-match > a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
