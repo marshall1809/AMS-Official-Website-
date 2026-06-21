@@ -146,6 +146,7 @@ export type MediaAsset = {
   title?: string;
   altText?: string;
   publicUrl?: string;
+  mimeType?: string;
 };
 
 export type TeamRecord = {
