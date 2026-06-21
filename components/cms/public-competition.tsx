@@ -83,7 +83,6 @@ export function PublicBracketPage({
     matchesByRound[0]?.length === 4 &&
     matchesByRound[1]?.length === 2 &&
     matchesByRound[2]?.length === 1;
-  const scheduleHref = season ? `/seasons/${season.slug}/schedule` : "/schedule";
 
   return (
     <SiteShell
@@ -103,9 +102,6 @@ export function PublicBracketPage({
           <span>{matches.length} knockout matches across {rounds.length} rounds</span>
           <div className="competition-toolbar__actions">
             <BracketExportButton />
-            <Link className="button secondary" href={scheduleHref}>
-              View schedule
-            </Link>
           </div>
         </div>
 
@@ -120,7 +116,6 @@ export function PublicBracketPage({
               data={data}
               finalMatch={matchesByRound[2][0]}
               quarterFinals={matchesByRound[0]}
-              scheduleHref={scheduleHref}
               season={season}
               semiFinals={matchesByRound[1]}
             />
@@ -166,7 +161,6 @@ export function PublicBracketPage({
                             <BracketMatch
                               data={data}
                               match={match}
-                              scheduleHref={scheduleHref}
                               season={season}
                             />
                           </div>
@@ -200,7 +194,6 @@ function MirroredEightTeamBracket({
   quarterFinals: MatchRecord[];
   semiFinals: MatchRecord[];
   finalMatch: MatchRecord;
-  scheduleHref: string;
 }) {
   return (
     <div className="public-bracket-shell public-bracket-shell--mirrored">
@@ -213,7 +206,6 @@ function MirroredEightTeamBracket({
                 data={data}
                 key={match.id}
                 match={match}
-                scheduleHref={scheduleHref}
                 season={season}
               />
             ))}
@@ -226,7 +218,6 @@ function MirroredEightTeamBracket({
             <BracketMatch
               data={data}
               match={semiFinals[0]}
-              scheduleHref={scheduleHref}
               season={season}
             />
           </div>
@@ -239,7 +230,6 @@ function MirroredEightTeamBracket({
             <BracketMatch
               data={data}
               match={finalMatch}
-              scheduleHref={scheduleHref}
               season={season}
             />
           </div>
@@ -251,7 +241,6 @@ function MirroredEightTeamBracket({
             <BracketMatch
               data={data}
               match={semiFinals[1]}
-              scheduleHref={scheduleHref}
               season={season}
             />
           </div>
@@ -265,7 +254,6 @@ function MirroredEightTeamBracket({
                 data={data}
                 key={match.id}
                 match={match}
-                scheduleHref={scheduleHref}
                 season={season}
               />
             ))}
@@ -368,7 +356,6 @@ function BracketMatch({
   data: CmsData;
   season?: SeasonRecord;
   match: MatchRecord;
-  scheduleHref: string;
 }) {
   const participants = matchParticipants(data, match);
 
@@ -396,9 +383,9 @@ function BracketMatch({
         );
       })}
 
-      <Link href={`${scheduleHref}#match-${match.id}`}>
-        {match.startsAt ? formatDate(match.startsAt) : "Open in schedule"}
-      </Link>
+      <div className="public-bracket-match__timing">
+        {match.startsAt ? formatDate(match.startsAt) : "Date arranged by teams"}
+      </div>
     </article>
   );
 }
