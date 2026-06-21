@@ -936,3 +936,48 @@ textarea {
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
+
+
+.rules-pdf {
+  margin-top: 32px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 28px;
+}
+
+.rules-pdf > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+  border: 0;
+  padding: 0;
+}
+
+.rules-pdf h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.25rem;
+}
+
+.rules-pdf iframe {
+  display: block;
+  width: 100%;
+  height: min(1100px, 82vh);
+  min-height: 720px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: #fff;
+}
+
+@media (max-width: 640px) {
+  .rules-pdf > header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .rules-pdf iframe {
+    height: 72vh;
+    min-height: 560px;
+  }
+}

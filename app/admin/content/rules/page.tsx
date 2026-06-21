@@ -6,8 +6,10 @@ import styles from "@/components/admin/rules-manager.module.css";
 import { requireAdminAccess } from "@/lib/admin/permissions";
 import {
   createRulesetAction,
+  removeRulesetPdfAction,
   updateRulesetAction,
-  updateRulesetStatusAction
+  updateRulesetStatusAction,
+  uploadRulesetPdfAction
 } from "@/lib/admin/rules-actions";
 import { createSupabaseServerClient } from "@/lib/auth/server";
 
@@ -29,7 +31,14 @@ type RulesetRow = {
   body: string;
   status: "draft" | "published" | "archived" | "deleted";
   published_at: string | null;
+  pdf_asset_id: string | null;
   updated_at: string;
+};
+
+type PdfAssetRow = {
+  id: string;
+  public_url: string | null;
+  title: string | null;
 };
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -63,12 +72,13 @@ export default async function RulesPage({
     null;
 
   let rulesets: RulesetRow[] = [];
+  let pdfAssets: PdfAssetRow[] = [];
   let rulesError: string | undefined;
 
   if (selectedSeason) {
     const { data, error } = await supabase
       .from("rulesets")
-      .select("id, title, body, status, published_at, updated_at")
+      .select("id, title, body, status, published_at, pdf_asset_id, updated_at")
       .eq("scope", "season")
       .eq("scope_id", selectedSeason.id)
       .neq("status", "deleted")
@@ -76,6 +86,20 @@ export default async function RulesPage({
 
     rulesets = (data ?? []) as RulesetRow[];
     rulesError = error?.message;
+
+    const pdfAssetIds = rulesets
+      .map((ruleset) => ruleset.pdf_asset_id)
+      .filter((id): id is string => Boolean(id));
+
+    if (pdfAssetIds.length) {
+      const { data: assetData, error: assetError } = await supabase
+        .from("media_assets")
+        .select("id, public_url, title")
+        .in("id", pdfAssetIds);
+
+      pdfAssets = (assetData ?? []) as PdfAssetRow[];
+      rulesError = rulesError ?? assetError?.message;
+    }
   }
 
   const feedback = getFeedback(params, seasonError?.message ?? rulesError);
@@ -134,6 +158,52 @@ export default async function RulesPage({
                         </div>
                         <span className={styles.badge}>{ruleset.status}</span>
                       </div>
+
+                      <section className={styles.pdfBox}>
+                        {ruleset.pdf_asset_id ? (
+                          <>
+                            <div>
+                              <strong>Rules PDF</strong>
+                              <a
+                                href={
+                                  pdfAssets.find((asset) => asset.id === ruleset.pdf_asset_id)
+                                    ?.public_url ?? "#"
+                                }
+                                rel="noreferrer"
+                                target="_blank"
+                              >
+                                Preview current PDF
+                              </a>
+                            </div>
+                            <form action={removeRulesetPdfAction}>
+                              <input name="seasonId" type="hidden" value={selectedSeason!.id} />
+                              <input name="rulesetId" type="hidden" value={ruleset.id} />
+                              <button className={styles.dangerButton} type="submit">
+                                Remove PDF
+                              </button>
+                            </form>
+                          </>
+                        ) : (
+                          <span>No PDF uploaded</span>
+                        )}
+
+                        <form
+                          action={uploadRulesetPdfAction}
+                          className={styles.pdfUpload}
+                          encType="multipart/form-data"
+                        >
+                          <input name="seasonId" type="hidden" value={selectedSeason!.id} />
+                          <input name="rulesetId" type="hidden" value={ruleset.id} />
+                          <label className={styles.field}>
+                            {ruleset.pdf_asset_id ? "Replace PDF" : "Upload PDF"}
+                            <input accept="application/pdf,.pdf" name="pdf" type="file" required />
+                          </label>
+                          <small>PDF only, maximum 4 MB.</small>
+                          <button className={styles.secondaryButton} type="submit">
+                            {ruleset.pdf_asset_id ? "Replace PDF" : "Upload PDF"}
+                          </button>
+                        </form>
+                      </section>
 
                       <div className={styles.actions}>
                         {ruleset.status !== "published" ? (
@@ -256,8 +326,14 @@ function getFeedback(params: SearchParams, queryError?: string) {
   if (params.created === "1") return "Ruleset draft created.";
   if (params.updated === "1") return "Ruleset saved.";
   if (params.statusUpdated === "1") return "Ruleset status updated.";
+  if (params.pdfUploaded === "1") return "Rules PDF uploaded successfully.";
+  if (params.pdfRemoved === "1") return "Rules PDF removed.";
   if (params.error === "invalid-ruleset") return "Please enter a title and at least 10 characters of rules text.";
   if (params.error === "invalid-status") return "The requested ruleset status is invalid.";
+  if (params.error === "select-pdf") return "Please select a PDF file.";
+  if (params.error === "pdf-type") return "Only PDF files are supported.";
+  if (params.error === "pdf-too-large") return "The PDF must be 4 MB or smaller.";
+  if (params.error === "pdf-not-found") return "This ruleset has no PDF to remove.";
   if (typeof params.error === "string") return `Action failed: ${params.error}`;
   return null;
 }

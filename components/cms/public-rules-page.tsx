@@ -33,6 +33,9 @@ export function PublicRulesPage({
     .filter((ruleset) => ruleset.status === "published")
     .filter((ruleset) => (season ? ruleset.seasonId === season.id : !ruleset.seasonId));
   const ruleset = rulesets[0];
+  const pdfAsset = ruleset?.pdfAssetId
+    ? data.mediaAssets.find((asset) => asset.id === ruleset.pdfAssetId)
+    : undefined;
 
   return (
     <SiteShell data={data} season={season} theme={theme} page={page}>
@@ -53,6 +56,29 @@ export function PublicRulesPage({
                 <h2>{ruleset.title}</h2>
               </header>
               <div className="rules-document">{ruleset.body}</div>
+              {pdfAsset?.publicUrl ? (
+                <section className="rules-pdf">
+                  <header>
+                    <div>
+                      <p className="section-kicker">Official document</p>
+                      <h3>{pdfAsset.title ?? ruleset.title}</h3>
+                    </div>
+                    <a
+                      className="button secondary"
+                      href={pdfAsset.publicUrl}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      Open PDF
+                    </a>
+                  </header>
+                  <iframe
+                    loading="eager"
+                    src={`${pdfAsset.publicUrl}#view=FitH&toolbar=1`}
+                    title={pdfAsset.title ?? `${ruleset.title} PDF`}
+                  />
+                </section>
+              ) : null}
             </>
           ) : (
             <>

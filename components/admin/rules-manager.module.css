@@ -210,3 +210,41 @@
     flex-direction: column;
   }
 }
+
+
+.pdfBox {
+  display: grid;
+  gap: 12px;
+  margin: 14px 0;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 7px;
+  background: rgba(2, 7, 16, 0.45);
+  padding: 14px;
+}
+
+.pdfBox > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pdfBox a {
+  color: #d7bb63;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.pdfUpload {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+  padding-top: 12px;
+}
+
+.pdfUpload small,
+.pdfBox > span {
+  color: #8ea0ba;
+  font-size: 0.76rem;
+}
