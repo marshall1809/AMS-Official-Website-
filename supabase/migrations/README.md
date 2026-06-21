@@ -21,6 +21,7 @@ Run these files in order on a fresh Supabase project.
 17. `017_mvp_legacy_team_bridge.sql`
 18. `018_mvp_single_elimination.sql`
 19. `019_mvp_rules_pdf_storage.sql`
+20. `020_public_team_logo_read.sql`
 
 ## Important
 
@@ -39,3 +40,5 @@ Before running `014_seed_defaults.sql`, optionally replace the commented Super A
 `018_mvp_single_elimination.sql` adds the launch-only Single Elimination bracket tables and policies.
 
 `019_mvp_rules_pdf_storage.sql` allows Season rules PDFs in `ams-media` and adds Content Manager upload/removal policies.
+
+`020_public_team_logo_read.sql` ensures that logo assets used by teams in public Seasons can be read by the anonymous public website.
