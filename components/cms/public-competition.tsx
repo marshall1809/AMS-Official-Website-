@@ -67,7 +67,7 @@ export function PublicBracketPage({
   data: CmsData;
   season?: SeasonRecord;
 }) {
-  const matches = seasonMatches(data, season?.id);
+  const matches = knockoutMatches(data, season?.id);
   const rounds = Array.from(
     new Set(matches.map((match) => match.roundLabel ?? "Round"))
   ).sort(roundOrder);
@@ -77,6 +77,11 @@ export function PublicBracketPage({
       .sort((a, b) => (a.bracketPosition ?? 0) - (b.bracketPosition ?? 0))
   );
   const bracketSlots = Math.max(1, ...matchesByRound.map((roundMatches) => roundMatches.length));
+  const isMirroredEightTeamBracket =
+    matchesByRound.length === 3 &&
+    matchesByRound[0]?.length === 4 &&
+    matchesByRound[1]?.length === 2 &&
+    matchesByRound[2]?.length === 1;
   const scheduleHref = season ? `/seasons/${season.slug}/schedule` : "/schedule";
 
   return (
@@ -94,68 +99,179 @@ export function PublicBracketPage({
 
       <section className="container content-section public-bracket-section">
         <div className="competition-toolbar">
-          <span>{matches.length} matches across {rounds.length} rounds</span>
+          <span>{matches.length} knockout matches across {rounds.length} rounds</span>
           <Link className="button secondary" href={scheduleHref}>
             View schedule
           </Link>
         </div>
 
         {matches.length ? (
-          <div className="public-bracket-shell">
-            <div
-              className="public-bracket"
-              style={{ "--bracket-slots": bracketSlots } as React.CSSProperties}
-            >
-              {rounds.map((round, roundIndex) => {
-                const roundMatches = matchesByRound[roundIndex];
-                const slotSpan = Math.max(
-                  1,
-                  Math.floor(bracketSlots / Math.max(1, roundMatches.length))
-                );
+          isMirroredEightTeamBracket ? (
+            <MirroredEightTeamBracket
+              data={data}
+              finalMatch={matchesByRound[2][0]}
+              quarterFinals={matchesByRound[0]}
+              scheduleHref={scheduleHref}
+              season={season}
+              semiFinals={matchesByRound[1]}
+            />
+          ) : (
+            <div className="public-bracket-shell">
+              <div
+                className="public-bracket"
+                style={{ "--bracket-slots": bracketSlots } as React.CSSProperties}
+              >
+                {rounds.map((round, roundIndex) => {
+                  const roundMatches = matchesByRound[roundIndex];
+                  const slotSpan = Math.max(
+                    1,
+                    Math.floor(bracketSlots / Math.max(1, roundMatches.length))
+                  );
 
-                return (
-                  <section
-                    className={[
-                      "public-bracket-round",
-                      roundIndex === 0 ? "is-opening-round" : "",
-                      roundIndex === rounds.length - 1 ? "is-final-round" : ""
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                    key={round}
-                  >
-                    <h2>
-                      <span>{round}</span>
-                      <small>{roundMatches.length} {roundMatches.length === 1 ? "match" : "matches"}</small>
-                    </h2>
-                    <div className="public-bracket-round__matches">
-                      {roundMatches.map((match, matchIndex) => (
-                        <div
-                          className="public-bracket-slot"
-                          key={match.id}
-                          style={{
-                            gridRow: `${matchIndex * slotSpan + 1} / span ${slotSpan}`
-                          }}
-                        >
-                          <BracketMatch
-                            data={data}
-                            match={match}
-                            scheduleHref={scheduleHref}
-                            season={season}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                );
-              })}
+                  return (
+                    <section
+                      className={[
+                        "public-bracket-round",
+                        roundIndex === 0 ? "is-opening-round" : "",
+                        roundIndex === rounds.length - 1 ? "is-final-round" : ""
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      key={round}
+                    >
+                      <h2>
+                        <span>{round}</span>
+                        <small>
+                          {roundMatches.length} {roundMatches.length === 1 ? "match" : "matches"}
+                        </small>
+                      </h2>
+                      <div className="public-bracket-round__matches">
+                        {roundMatches.map((match, matchIndex) => (
+                          <div
+                            className="public-bracket-slot"
+                            key={match.id}
+                            style={{
+                              gridRow: `${matchIndex * slotSpan + 1} / span ${slotSpan}`
+                            }}
+                          >
+                            <BracketMatch
+                              data={data}
+                              match={match}
+                              scheduleHref={scheduleHref}
+                              season={season}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )
         ) : (
           <CompetitionEmpty text="The knockout bracket has not been generated yet." />
         )}
       </section>
     </SiteShell>
+  );
+}
+
+function MirroredEightTeamBracket({
+  data,
+  season,
+  quarterFinals,
+  semiFinals,
+  finalMatch,
+  scheduleHref
+}: {
+  data: CmsData;
+  season?: SeasonRecord;
+  quarterFinals: MatchRecord[];
+  semiFinals: MatchRecord[];
+  finalMatch: MatchRecord;
+  scheduleHref: string;
+}) {
+  return (
+    <div className="public-bracket-shell public-bracket-shell--mirrored">
+      <div className="public-bracket-mirrored">
+        <section className="public-bracket-mirror-column mirror-quarter mirror-left">
+          <BracketColumnHeading label="Quarter Finals" matches={2} />
+          <div className="public-bracket-mirror-stack">
+            {quarterFinals.slice(0, 2).map((match) => (
+              <BracketMatch
+                data={data}
+                key={match.id}
+                match={match}
+                scheduleHref={scheduleHref}
+                season={season}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="public-bracket-mirror-column mirror-semi mirror-left">
+          <BracketColumnHeading label="Semi Final" matches={1} />
+          <div className="public-bracket-mirror-center">
+            <BracketMatch
+              data={data}
+              match={semiFinals[0]}
+              scheduleHref={scheduleHref}
+              season={season}
+            />
+          </div>
+        </section>
+
+        <section className="public-bracket-mirror-column mirror-final">
+          <BracketColumnHeading label="Final" matches={1} />
+          <span className="public-bracket-final-line" aria-hidden="true" />
+          <div className="public-bracket-mirror-center">
+            <BracketMatch
+              data={data}
+              match={finalMatch}
+              scheduleHref={scheduleHref}
+              season={season}
+            />
+          </div>
+        </section>
+
+        <section className="public-bracket-mirror-column mirror-semi mirror-right">
+          <BracketColumnHeading label="Semi Final" matches={1} />
+          <div className="public-bracket-mirror-center">
+            <BracketMatch
+              data={data}
+              match={semiFinals[1]}
+              scheduleHref={scheduleHref}
+              season={season}
+            />
+          </div>
+        </section>
+
+        <section className="public-bracket-mirror-column mirror-quarter mirror-right">
+          <BracketColumnHeading label="Quarter Finals" matches={2} />
+          <div className="public-bracket-mirror-stack">
+            {quarterFinals.slice(2, 4).map((match) => (
+              <BracketMatch
+                data={data}
+                key={match.id}
+                match={match}
+                scheduleHref={scheduleHref}
+                season={season}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function BracketColumnHeading({ label, matches }: { label: string; matches: number }) {
+  return (
+    <h2>
+      <span>{label}</span>
+      <small>{matches} {matches === 1 ? "match" : "matches"}</small>
+    </h2>
   );
 }
 
@@ -339,6 +455,27 @@ function CompetitionEmpty({ text }: { text: string }) {
       <p>{text}</p>
     </section>
   );
+}
+
+function knockoutMatches(data: CmsData, seasonId?: string) {
+  if (!seasonId) return [];
+
+  const knockoutStageIds = new Set(
+    data.stages
+      .filter((stage) => stage.type === "single_elimination")
+      .map((stage) => stage.id)
+  );
+  const grouped = new Map<string, MatchRecord[]>();
+
+  for (const match of seasonMatches(data, seasonId)) {
+    if (!match.stageId || !knockoutStageIds.has(match.stageId)) continue;
+    const stageMatches = grouped.get(match.stageId) ?? [];
+    stageMatches.push(match);
+    grouped.set(match.stageId, stageMatches);
+  }
+
+  const candidates = Array.from(grouped.values()).sort((a, b) => b.length - a.length);
+  return candidates[0] ?? [];
 }
 
 function seasonMatches(data: CmsData, seasonId?: string) {
