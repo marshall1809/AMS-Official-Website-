@@ -10,7 +10,7 @@ export type AppRole =
   | "viewer";
 
 export type EntityStatus = "draft" | "published" | "archived" | "deleted";
-export type SeasonStatus = "draft" | "active" | "archived" | "deleted";
+export type SeasonStatus = "draft" | "setup" | "ready" | "active" | "finished" | "archived" | "deleted";
 export type TeamParticipationStatus = "active" | "inactive" | "eliminated" | "archived";
 export type LegacyTeamParticipationStatus = "confirmed" | "pending" | "withdrawn";
 export type MatchStatus = "scheduled" | "live" | "completed" | "postponed" | "cancelled";

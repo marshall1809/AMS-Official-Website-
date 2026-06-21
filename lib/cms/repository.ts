@@ -14,12 +14,16 @@ const tableNames = [
   "page_blocks",
   "media_assets",
   "teams",
+  "team_versions",
   "season_teams",
   "players",
+  "divisions",
+  "competitions",
   "tournaments",
   "stages",
   "matches",
   "match_participants",
+  "match_results",
   "bracket_edges",
   "news_posts",
   "rulesets",
@@ -27,6 +31,7 @@ const tableNames = [
 ] as const;
 
 type SupabaseTable = (typeof tableNames)[number];
+type RecordValue = Record<string, unknown>;
 
 function isSupabaseConfigured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -54,7 +59,7 @@ function camelize(value: unknown): unknown {
   if (!value || typeof value !== "object") return value;
 
   return Object.fromEntries(
-    Object.entries(value as Record<string, unknown>).map(([key, item]) => [
+    Object.entries(value as RecordValue).map(([key, item]) => [
       camelizeKey(key),
       camelize(item)
     ])
@@ -66,12 +71,17 @@ async function fetchTable(table: SupabaseTable) {
   if (!supabase) return null;
 
   const { data, error } = await supabase.from(table).select("*");
-  if (error) throw error;
+
+  if (error) {
+    console.warn(`Public CMS table unavailable: ${table}`, error.message);
+    return null;
+  }
+
   return data ?? [];
 }
 
 function normalizeSiteSettings(record: unknown): SiteSettings {
-  const settings = camelize(record) as (SiteSettings & { settings?: Record<string, unknown> }) | undefined;
+  const settings = camelize(record) as (SiteSettings & { settings?: RecordValue }) | undefined;
 
   if (!settings) return defaultCmsData.siteSettings;
 
@@ -85,23 +95,116 @@ function normalizeSiteSettings(record: unknown): SiteSettings {
   };
 }
 
+function scopedRecords(value: unknown[]) {
+  return (camelize(value) as RecordValue[]).map((record) =>
+    record.scope === "season" && typeof record.scopeId === "string"
+      ? { ...record, seasonId: record.scopeId }
+      : record
+  );
+}
+
 function normalizeSupabaseData(raw: Record<SupabaseTable, unknown[]>): CmsData {
-  const pages = (camelize(raw.pages) as Array<Record<string, unknown> & { id: string }>).map((page) => ({
-    ...page,
-    blocks: []
+  const pageRows = scopedRecords(raw.pages);
+  const pages = (pageRows.length ? pageRows : (defaultCmsData.pages as unknown as RecordValue[])).map(
+    (page) => ({ ...page, blocks: [] })
+  );
+  const blocks = camelize(
+    raw.page_blocks.length ? raw.page_blocks : defaultCmsData.pages.flatMap((page) =>
+      page.blocks.map((block) => ({ ...block, pageId: page.id }))
+    )
+  ) as Array<CmsData["pages"][number]["blocks"][number] & { pageId: string }>;
+
+  const teamVersions = camelize(raw.team_versions) as RecordValue[];
+  const teamRows = camelize(raw.teams) as RecordValue[];
+  const teams = teamRows.map((team) => {
+    const version = teamVersions.find((item) => item.id === team.currentVersionId);
+
+    return {
+      ...team,
+      name: version?.name ?? team.canonicalName ?? "Team",
+      tag: version?.tag,
+      defaultLogoId: version?.logoAssetId,
+      logoAssetId: version?.logoAssetId,
+      description: version?.description ?? team.description,
+      socialLinks: team.socials
+    };
+  });
+
+  const seasonTeams = (camelize(raw.season_teams) as RecordValue[]).map((seasonTeam) => {
+    const version = teamVersions.find((item) => item.id === seasonTeam.teamVersionId);
+
+    return {
+      ...seasonTeam,
+      displayName: version?.name,
+      tag: version?.tag,
+      logoAssetId: version?.logoAssetId
+    };
+  });
+
+  const divisions = camelize(raw.divisions) as RecordValue[];
+  const competitionRows = camelize(raw.competitions) as RecordValue[];
+  const legacyTournaments = camelize(raw.tournaments) as RecordValue[];
+  const tournaments = competitionRows.length
+    ? competitionRows.map((competition) => {
+        const division = divisions.find((item) => item.id === competition.divisionId);
+        return {
+          ...competition,
+          seasonId: division?.seasonId
+        };
+      })
+    : legacyTournaments;
+
+  const stageRows = camelize(raw.stages) as RecordValue[];
+  const stages = stageRows.map((stage) => ({
+    ...stage,
+    tournamentId: stage.competitionId ?? stage.tournamentId
   }));
 
-  const blocks = camelize(raw.page_blocks ?? []) as unknown as Array<
-    CmsData["pages"][number]["blocks"][number] & { pageId: string }
-  >;
+  const resultRows = camelize(raw.match_results) as RecordValue[];
+  const participantRows = camelize(raw.match_participants) as RecordValue[];
+  const matchRows = camelize(raw.matches) as RecordValue[];
+  const matches = matchRows.map((match) => {
+    const result = resultRows.find(
+      (item) => item.matchId === match.id && item.isCurrent === true
+    );
+    const winner = participantRows.find(
+      (item) => item.id === result?.winnerParticipantId
+    );
+
+    return {
+      ...match,
+      tournamentId: match.competitionId ?? match.tournamentId,
+      winnerTeamId: winner?.teamId
+    };
+  });
+  const matchParticipants = participantRows.map((participant) => {
+    const result = resultRows.find(
+      (item) => item.matchId === participant.matchId && item.isCurrent === true
+    );
+    const score = result?.score as Record<string, unknown> | undefined;
+
+    return {
+      ...participant,
+      score:
+        score && (typeof score[String(participant.slot)] === "number")
+          ? score[String(participant.slot)]
+          : null
+    };
+  });
+
+  const themeRows = scopedRecords(raw.themes);
+  const navigationRows = scopedRecords(raw.navigation_items);
+  const routeRows = camelize(raw.routes) as RecordValue[];
 
   return {
     ...defaultCmsData,
-    siteSettings: normalizeSiteSettings(raw.site_settings?.[0]),
-    themes: camelize(raw.themes) as CmsData["themes"],
+    siteSettings: normalizeSiteSettings(raw.site_settings[0]),
+    themes: (themeRows.length ? themeRows : defaultCmsData.themes) as CmsData["themes"],
     seasons: camelize(raw.seasons) as CmsData["seasons"],
-    navigationItems: camelize(raw.navigation_items) as CmsData["navigationItems"],
-    routes: camelize(raw.routes) as CmsData["routes"],
+    navigationItems: (navigationRows.length
+      ? navigationRows
+      : defaultCmsData.navigationItems) as CmsData["navigationItems"],
+    routes: (routeRows.length ? routeRows : defaultCmsData.routes) as CmsData["routes"],
     redirects: camelize(raw.redirects) as CmsData["redirects"],
     pages: pages.map((page) => ({
       ...(page as unknown as CmsData["pages"][number]),
@@ -109,32 +212,39 @@ function normalizeSupabaseData(raw: Record<SupabaseTable, unknown[]>): CmsData {
         .filter((block) => block.pageId === page.id)
         .sort((a, b) => Number(a.sortOrder ?? 0) - Number(b.sortOrder ?? 0))
     })),
-    mediaAssets: camelize(raw.media_assets) as CmsData["mediaAssets"],
-    teams: camelize(raw.teams) as CmsData["teams"],
-    seasonTeams: camelize(raw.season_teams) as CmsData["seasonTeams"],
+    mediaAssets: scopedRecords(raw.media_assets) as CmsData["mediaAssets"],
+    teams: teams as CmsData["teams"],
+    seasonTeams: seasonTeams as CmsData["seasonTeams"],
     players: camelize(raw.players) as CmsData["players"],
-    tournaments: camelize(raw.tournaments) as CmsData["tournaments"],
-    stages: camelize(raw.stages) as CmsData["stages"],
-    matches: camelize(raw.matches) as CmsData["matches"],
-    matchParticipants: camelize(raw.match_participants) as CmsData["matchParticipants"],
+    tournaments: tournaments as CmsData["tournaments"],
+    stages: stages as CmsData["stages"],
+    matches: matches as CmsData["matches"],
+    matchParticipants: matchParticipants as CmsData["matchParticipants"],
     bracketEdges: camelize(raw.bracket_edges) as CmsData["bracketEdges"],
-    newsPosts: camelize(raw.news_posts) as CmsData["newsPosts"],
-    rulesets: camelize(raw.rulesets) as CmsData["rulesets"],
-    sponsors: camelize(raw.sponsors) as CmsData["sponsors"]
+    newsPosts: scopedRecords(raw.news_posts) as CmsData["newsPosts"],
+    rulesets: scopedRecords(raw.rulesets) as CmsData["rulesets"],
+    sponsors: scopedRecords(raw.sponsors).map((sponsor) => ({
+      ...sponsor,
+      isActive: sponsor.status === "published"
+    })) as CmsData["sponsors"]
   };
 }
 
 export const getCmsData = cache(async (): Promise<CmsData> => {
   if (!isSupabaseConfigured()) return defaultCmsData;
 
-  try {
-    const entries = await Promise.all(
-      tableNames.map(async (table) => [table, await fetchTable(table)] as const)
-    );
+  const entries = await Promise.all(
+    tableNames.map(async (table) => [table, await fetchTable(table)] as const)
+  );
+  const successfulTables = entries.filter(([, data]) => data !== null);
 
-    return normalizeSupabaseData(Object.fromEntries(entries) as Record<SupabaseTable, unknown[]>);
-  } catch (error) {
-    console.error("Falling back to bundled CMS seed data.", error);
+  if (!successfulTables.length) {
     return defaultCmsData;
   }
+
+  const raw = Object.fromEntries(
+    entries.map(([table, data]) => [table, data ?? []])
+  ) as Record<SupabaseTable, unknown[]>;
+
+  return normalizeSupabaseData(raw);
 });

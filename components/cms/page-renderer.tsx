@@ -313,11 +313,15 @@ function NewsListBlock({ block, data, page }: { block: PageBlock; data: CmsData;
 function RulesBlock({ block, data, page }: { block: PageBlock; data: CmsData; page: PageRecord }) {
   const seasonId = seasonIdFor(block, page, data);
   const ruleset = stringValue(block.content.rulesetId)
-    ? data.rulesets.find((item) => item.id === block.content.rulesetId)
-    : data.rulesets.find((item) => item.seasonId === seasonId && item.status === "published") ?? data.rulesets.find((item) => item.seasonId === seasonId);
+    ? data.rulesets.find(
+        (item) => item.id === block.content.rulesetId && item.status === "published"
+      )
+    : data.rulesets.find(
+        (item) => item.seasonId === seasonId && item.status === "published"
+      );
   if (!ruleset) return <section className="container content-section"><article className="copy-block panel"><h2>Rules</h2><p>No rules have been published for this season yet.</p></article></section>;
 
-  return <section className="container content-section"><article className="copy-block panel"><h2>{ruleset.title}</h2><p>{ruleset.body}</p></article></section>;
+  return <section className="container content-section"><article className="copy-block panel"><h2>{ruleset.title}</h2><div className="rules-document">{ruleset.body}</div></article></section>;
 }
 
 function SponsorStripBlock({ block, data, page }: { block: PageBlock; data: CmsData; page: PageRecord }) {
