@@ -16,10 +16,32 @@ export function SiteShell({
   page: PageRecord;
   children: React.ReactNode;
 }) {
-  const navigation = data.navigationItems
+  const seasonBase = season ? `/seasons/${season.slug}` : "";
+  const coreNavigation = [
+    { id: "core-home", label: "Home", href: "/", scope: "global" as const, sortOrder: 0, isVisible: true },
+    { id: "core-teams", label: "Teams", href: seasonBase + "/teams", scope: "global" as const, sortOrder: 20, isVisible: true },
+    { id: "core-schedule", label: "Schedule", href: seasonBase + "/schedule", scope: "global" as const, sortOrder: 30, isVisible: true },
+    { id: "core-bracket", label: "Bracket", href: seasonBase + "/bracket", scope: "global" as const, sortOrder: 40, isVisible: true },
+    { id: "core-rules", label: "Rules", href: seasonBase + "/rules", scope: "global" as const, sortOrder: 50, isVisible: true }
+  ];
+  const normalizedNavigation = data.navigationItems
     .filter((item) => item.isVisible)
     .filter((item) => item.scope === "global" || item.seasonId === season?.id)
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+    .map((item) => {
+      const coreItem = coreNavigation.find(
+        (candidate) => candidate.label.toLowerCase() === item.label.toLowerCase()
+      );
+      return coreItem ? { ...item, href: coreItem.href } : item;
+    });
+  const navigation = [...normalizedNavigation];
+
+  for (const item of coreNavigation) {
+    if (!navigation.some((candidate) => candidate.href === item.href)) {
+      navigation.push(item);
+    }
+  }
+
+  navigation.sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
     <div className="theme-root" style={themeToStyle(theme.tokens)} data-page-id={page.id}>
