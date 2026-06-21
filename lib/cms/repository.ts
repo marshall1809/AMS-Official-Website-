@@ -103,6 +103,34 @@ function scopedRecords(value: unknown[]) {
   );
 }
 
+function normalizeMediaAssets(value: unknown[]) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+
+  return scopedRecords(value).map((asset) => {
+    if (typeof asset.publicUrl === "string" && asset.publicUrl.length > 0) {
+      return asset;
+    }
+
+    if (
+      supabaseUrl &&
+      typeof asset.bucket === "string" &&
+      typeof asset.path === "string"
+    ) {
+      const encodedPath = asset.path
+        .split("/")
+        .map((part) => encodeURIComponent(part))
+        .join("/");
+
+      return {
+        ...asset,
+        publicUrl: `${supabaseUrl}/storage/v1/object/public/${encodeURIComponent(asset.bucket)}/${encodedPath}`
+      };
+    }
+
+    return asset;
+  });
+}
+
 function normalizeSupabaseData(raw: Record<SupabaseTable, unknown[]>): CmsData {
   const pageRows = scopedRecords(raw.pages);
   const pages = (
@@ -217,7 +245,7 @@ function normalizeSupabaseData(raw: Record<SupabaseTable, unknown[]>): CmsData {
         .filter((block) => block.pageId === page.id)
         .sort((a, b) => Number(a.sortOrder ?? 0) - Number(b.sortOrder ?? 0))
     })),
-    mediaAssets: scopedRecords(raw.media_assets) as CmsData["mediaAssets"],
+    mediaAssets: normalizeMediaAssets(raw.media_assets) as CmsData["mediaAssets"],
     teams: teams as CmsData["teams"],
     seasonTeams: seasonTeams as CmsData["seasonTeams"],
     players: camelize(raw.players) as CmsData["players"],
