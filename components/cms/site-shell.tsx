@@ -21,14 +21,16 @@ export function SiteShell({
     { id: "core-home", label: "Home", href: "/", scope: "global" as const, sortOrder: 0, isVisible: true },
     { id: "core-teams", label: "Teams", href: seasonBase + "/teams", scope: "global" as const, sortOrder: 20, isVisible: true },
     { id: "core-bracket", label: "Bracket", href: seasonBase + "/bracket", scope: "global" as const, sortOrder: 40, isVisible: true },
-    { id: "core-rules", label: "Rules", href: seasonBase + "/rules", scope: "global" as const, sortOrder: 50, isVisible: true }
+    { id: "core-info", label: "Info", href: seasonBase + "/info", scope: "global" as const, sortOrder: 50, isVisible: true }
   ];
   const normalizedNavigation = data.navigationItems
     .filter((item) => item.isVisible)
     .filter(
       (item) =>
         item.label.toLowerCase() !== "schedule" &&
-        !item.href.toLowerCase().includes("/schedule")
+        !item.href.toLowerCase().includes("/schedule") &&
+        item.label.toLowerCase() !== "rules" &&
+        !item.href.toLowerCase().includes("/rules")
     )
     .filter((item) => item.scope === "global" || item.seasonId === season?.id)
     .map((item) => {
