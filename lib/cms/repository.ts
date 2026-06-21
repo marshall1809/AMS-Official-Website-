@@ -141,7 +141,8 @@ function normalizeSupabaseData(raw: Record<SupabaseTable, unknown[]>): CmsData {
       ...seasonTeam,
       displayName: version?.name,
       tag: version?.tag,
-      logoAssetId: version?.logoAssetId
+      logoAssetId: version?.logoAssetId,
+      description: version?.description
     };
   });
 

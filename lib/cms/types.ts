@@ -170,6 +170,7 @@ export type SeasonTeamRecord = {
   logoAssetId?: string;
   tag?: string;
   displayName?: string;
+  description?: string;
 };
 
 export type PlayerRecord = {
