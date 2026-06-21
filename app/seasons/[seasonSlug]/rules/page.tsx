@@ -1,21 +1,10 @@
-import { notFound } from "next/navigation";
-import { PublicRulesPage } from "@/components/cms/public-rules-page";
-import { getCmsData } from "@/lib/cms/repository";
+import { permanentRedirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-export default async function SeasonRulesPage({
+export default async function LegacySeasonRulesPage({
   params
 }: {
   params: Promise<{ seasonSlug: string }>;
 }) {
   const { seasonSlug } = await params;
-  const data = await getCmsData();
-  const season = data.seasons.find(
-    (item) => item.slug === seasonSlug && item.status !== "deleted"
-  );
-
-  if (!season) notFound();
-
-  return <PublicRulesPage data={data} season={season} />;
+  permanentRedirect(`/seasons/${seasonSlug}/info`);
 }
