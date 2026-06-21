@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+  "https://ams-official-website.vercel.app";
+
 export const metadata: Metadata = {
   title: {
     default: "Alliance Master Series",
@@ -8,12 +12,16 @@ export const metadata: Metadata = {
   },
   description:
     "The Alliance Master Series is a structured competitive alliance league for Supremacy: World War 3.",
-  metadataBase: new URL("https://alliance-master-series.vercel.app"),
+  metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: "/"
+  },
   openGraph: {
     title: "Alliance Master Series",
     description:
       "A modern tournament and league platform for competitive alliances.",
-    type: "website"
+    type: "website",
+    url: "/"
   }
 };
 
