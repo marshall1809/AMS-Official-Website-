@@ -69,7 +69,6 @@ export const adminNavigation: AdminNavGroup[] = [
       { title: "Divisions", href: "/admin/competition/divisions", icon: Landmark, description: "Division structure", requiredCapability: "manage_divisions" },
       { title: "Competitions", href: "/admin/competition/competitions", icon: Swords, description: "Formats and stages", requiredCapability: "manage_competitions" },
       { title: "Teams", href: "/admin/competition/teams", icon: Users, description: "Season participation", requiredCapability: "manage_teams" },
-      { title: "Schedule", href: "/admin/competition/schedule", icon: CalendarDays, description: "Match calendar", requiredCapability: "manage_competitions" },
       { title: "Matches", href: "/admin/competition/matches", icon: ClipboardList, description: "Results and reports", requiredCapability: "enter_results" },
       { title: "Standings", href: "/admin/competition/standings", icon: BarChart3, description: "Tables and rankings", requiredCapability: "manage_standings" },
       { title: "Brackets", href: "/admin/competition/brackets", icon: Boxes, description: "Advancement paths", requiredCapability: "manage_brackets" }
