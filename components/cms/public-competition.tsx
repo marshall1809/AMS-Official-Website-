@@ -186,8 +186,7 @@ function MirroredEightTeamBracket({
   season,
   quarterFinals,
   semiFinals,
-  finalMatch,
-  scheduleHref
+  finalMatch
 }: {
   data: CmsData;
   season?: SeasonRecord;
@@ -350,8 +349,7 @@ function ScheduleMatch({
 function BracketMatch({
   data,
   season,
-  match,
-  scheduleHref
+  match
 }: {
   data: CmsData;
   season?: SeasonRecord;
