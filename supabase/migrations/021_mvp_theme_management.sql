@@ -28,7 +28,7 @@ as $$
 $$;
 
 create or replace function public.ams_is_public_theme(
-  scope_input public.scope_type,
+  scope_input text,
   scope_id_input uuid
 )
 returns boolean
@@ -53,7 +53,7 @@ as $$
 $$;
 
 grant execute on function public.ams_can_manage_themes(uuid) to authenticated;
-grant execute on function public.ams_is_public_theme(public.scope_type, uuid) to anon, authenticated;
+grant execute on function public.ams_is_public_theme(text, uuid) to anon, authenticated;
 
 alter table public.themes enable row level security;
 
@@ -64,7 +64,7 @@ for select
 to anon, authenticated
 using (
   is_active = true
-  and public.ams_is_public_theme(scope, scope_id)
+  and public.ams_is_public_theme(scope::text, scope_id)
 );
 
 drop policy if exists ams_theme_admin_read on public.themes;
