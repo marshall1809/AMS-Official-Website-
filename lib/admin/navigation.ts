@@ -60,7 +60,7 @@ export const adminNavigation: AdminNavGroup[] = [
       { title: "Pages", href: "/admin/content/pages", icon: FileText, description: "CMS pages", requiredCapability: "manage_pages" },
       { title: "Navigation", href: "/admin/content/navigation", icon: Route, description: "Menus and links", requiredCapability: "manage_pages" },
       { title: "News", href: "/admin/content/news", icon: Newspaper, description: "Posts and announcements", requiredCapability: "manage_pages" },
-      { title: "Rules", href: "/admin/content/rules", icon: BookOpen, description: "Rulesets and documents", requiredCapability: "manage_pages" }
+      { title: "Info", href: "/admin/content/rules", icon: BookOpen, description: "Season information and documents", requiredCapability: "manage_pages" }
     ]
   },
   {
