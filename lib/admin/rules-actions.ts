@@ -8,7 +8,16 @@ import { createSupabaseServerClient } from "@/lib/auth/server";
 
 const RULES_PATH = "/admin/content/rules";
 const MEDIA_BUCKET = "ams-media";
-const MAX_PDF_SIZE = 4 * 1024 * 1024;
+const MAX_INFO_FILE_SIZE = 10 * 1024 * 1024;
+const INFO_FILE_TYPES = new Map([
+  ["application/pdf", "pdf"],
+  ["image/png", "png"],
+  ["image/jpeg", "jpg"],
+  ["image/webp", "webp"],
+  ["text/plain", "txt"],
+  ["application/msword", "doc"],
+  ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx"]
+]);
 const allowedStatuses = ["draft", "published", "archived"] as const;
 
 export async function createRulesetAction(formData: FormData) {
@@ -97,18 +106,20 @@ export async function uploadRulesetPdfAction(formData: FormData) {
   const { supabase, userId } = await requireRulesAccess();
   const seasonId = text(formData, "seasonId");
   const rulesetId = text(formData, "rulesetId");
-  const input = formData.get("pdf");
+  const input = formData.get("file") ?? formData.get("pdf");
 
   if (!seasonId || !rulesetId || !(input instanceof File) || input.size === 0) {
-    redirect(withParams({ season: seasonId, error: "select-pdf" }));
+    redirect(withParams({ season: seasonId, error: "select-file" }));
   }
 
-  if (input.type !== "application/pdf") {
-    redirect(withParams({ season: seasonId, error: "pdf-type" }));
+  const extension = INFO_FILE_TYPES.get(input.type);
+
+  if (!extension) {
+    redirect(withParams({ season: seasonId, error: "file-type" }));
   }
 
-  if (input.size > MAX_PDF_SIZE) {
-    redirect(withParams({ season: seasonId, error: "pdf-too-large" }));
+  if (input.size > MAX_INFO_FILE_SIZE) {
+    redirect(withParams({ season: seasonId, error: "file-too-large" }));
   }
 
   const { data: ruleset, error: rulesetError } = await supabase
@@ -123,11 +134,11 @@ export async function uploadRulesetPdfAction(formData: FormData) {
     redirect(withParams({ season: seasonId, error: rulesetError?.message ?? "ruleset-not-found" }));
   }
 
-  const path = `${seasonId}/rules/${rulesetId}/${randomUUID()}.pdf`;
+  const path = `${seasonId}/info/${rulesetId}/${randomUUID()}.${extension}`;
   const { error: uploadError } = await supabase.storage
     .from(MEDIA_BUCKET)
     .upload(path, await input.arrayBuffer(), {
-      contentType: "application/pdf",
+      contentType: input.type,
       upsert: false
     });
 
@@ -142,9 +153,9 @@ export async function uploadRulesetPdfAction(formData: FormData) {
       bucket: MEDIA_BUCKET,
       path,
       public_url: publicUrlData.publicUrl,
-      title: `${ruleset.title} PDF`,
-      alt_text: `${ruleset.title} rules PDF`,
-      mime_type: "application/pdf",
+      title: `${ruleset.title} document`,
+      alt_text: `${ruleset.title} information document`,
+      mime_type: input.type,
       size_bytes: input.size,
       state: "active",
       scope: "season",
@@ -157,7 +168,7 @@ export async function uploadRulesetPdfAction(formData: FormData) {
 
   if (assetError || !asset) {
     await supabase.storage.from(MEDIA_BUCKET).remove([path]);
-    redirect(withParams({ season: seasonId, error: assetError?.message ?? "pdf-media-record-failed" }));
+    redirect(withParams({ season: seasonId, error: assetError?.message ?? "file-media-record-failed" }));
   }
 
   const { error: updateError } = await supabase
@@ -266,6 +277,8 @@ async function requireRulesAccess() {
 
 function refreshRules() {
   revalidatePath(RULES_PATH);
+  revalidatePath("/info");
+  revalidatePath("/seasons/[seasonSlug]/info", "page");
   revalidatePath("/rules");
   revalidatePath("/seasons/[seasonSlug]/rules", "page");
 }
