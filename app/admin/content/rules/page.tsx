@@ -14,7 +14,7 @@ import {
 import { createSupabaseServerClient } from "@/lib/auth/server";
 
 export const metadata = {
-  title: "Rules | AMS Admin"
+  title: "Info | AMS Admin"
 };
 
 export const dynamic = "force-dynamic";
@@ -108,8 +108,8 @@ export default async function RulesPage({
     <div className={shellStyles.pageStack}>
       <AdminPageHeader
         path="/admin/content/rules"
-        title="Rules"
-        description="Create and publish the official rules for the selected Season."
+        title="Info"
+        description="Publish Season information, PDFs, images, and downloadable documents."
       />
 
       {feedback ? <div className={styles.feedback}>{feedback}</div> : null}
@@ -117,7 +117,7 @@ export default async function RulesPage({
       {!seasons.length ? (
         <section className={shellStyles.placeholderCard}>
           <h2>No Season available</h2>
-          <p>Create Season 1 before adding its official rules.</p>
+          <p>Create Season 1 before adding its information.</p>
           <Link className={shellStyles.primaryAction} href="/admin/seasons/new">
             Create Season
           </Link>
@@ -142,11 +142,11 @@ export default async function RulesPage({
 
           <div className={styles.grid}>
             <section className={styles.panel}>
-              <h2>{selectedSeason?.name} rules</h2>
-              <p>Published rules are visible to visitors. Archived rules remain stored but hidden.</p>
+              <h2>{selectedSeason?.name} information</h2>
+              <p>Published information is visible to visitors. Archived entries remain stored but hidden.</p>
 
               {!rulesets.length ? (
-                <div className={styles.empty}>No ruleset exists for this Season yet.</div>
+                <div className={styles.empty}>No information entry exists for this Season yet.</div>
               ) : (
                 <div className={styles.ruleList}>
                   {rulesets.map((ruleset) => (
@@ -163,7 +163,7 @@ export default async function RulesPage({
                         {ruleset.pdf_asset_id ? (
                           <>
                             <div>
-                              <strong>Rules PDF</strong>
+                              <strong>Attached document</strong>
                               <a
                                 href={
                                   pdfAssets.find((asset) => asset.id === ruleset.pdf_asset_id)
@@ -172,14 +172,14 @@ export default async function RulesPage({
                                 rel="noreferrer"
                                 target="_blank"
                               >
-                                Preview current PDF
+                                Open current file
                               </a>
                             </div>
                             <form action={removeRulesetPdfAction}>
                               <input name="seasonId" type="hidden" value={selectedSeason!.id} />
                               <input name="rulesetId" type="hidden" value={ruleset.id} />
                               <button className={styles.dangerButton} type="submit">
-                                Remove PDF
+                                Remove file
                               </button>
                             </form>
                           </>
@@ -195,12 +195,12 @@ export default async function RulesPage({
                           <input name="seasonId" type="hidden" value={selectedSeason!.id} />
                           <input name="rulesetId" type="hidden" value={ruleset.id} />
                           <label className={styles.field}>
-                            {ruleset.pdf_asset_id ? "Replace PDF" : "Upload PDF"}
-                            <input accept="application/pdf,.pdf" name="pdf" type="file" required />
+                            {ruleset.pdf_asset_id ? "Replace file" : "Upload file"}
+                            <input accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.doc,.docx,application/pdf,image/png,image/jpeg,image/webp,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" name="file" type="file" required />
                           </label>
-                          <small>PDF only, maximum 4 MB.</small>
+                          <small>PDF, image, text, DOC or DOCX, maximum 10 MB.</small>
                           <button className={styles.secondaryButton} type="submit">
-                            {ruleset.pdf_asset_id ? "Replace PDF" : "Upload PDF"}
+                            {ruleset.pdf_asset_id ? "Replace file" : "Upload file"}
                           </button>
                         </form>
                       </section>
@@ -240,7 +240,7 @@ export default async function RulesPage({
                       </div>
 
                       <details>
-                        <summary className={styles.secondaryButton}>Edit rules</summary>
+                        <summary className={styles.secondaryButton}>Edit information</summary>
                         <form action={updateRulesetAction} className={styles.editor}>
                           <input name="seasonId" type="hidden" value={selectedSeason!.id} />
                           <input name="rulesetId" type="hidden" value={ruleset.id} />
@@ -249,7 +249,7 @@ export default async function RulesPage({
                             <input defaultValue={ruleset.title} maxLength={160} name="title" required />
                           </label>
                           <label className={styles.field}>
-                            Rules text
+                            Information text
                             <textarea defaultValue={ruleset.body} name="body" required />
                           </label>
                           <button className={styles.button} type="submit">
@@ -264,19 +264,19 @@ export default async function RulesPage({
             </section>
 
             <section className={styles.panel}>
-              <h2>Create ruleset</h2>
-              <p>Start as a draft. You can publish it after reviewing the complete text.</p>
+              <h2>Create information entry</h2>
+              <p>Start as a draft and publish it when the information is ready.</p>
               <form action={createRulesetAction} className={styles.form}>
                 <input name="seasonId" type="hidden" value={selectedSeason?.id} />
                 <label className={styles.field}>
                   Title
-                  <input maxLength={160} name="title" placeholder="Season 1 Official Rules" required />
+                  <input maxLength={160} name="title" placeholder="Season 1 Information" required />
                 </label>
                 <label className={styles.field}>
-                  Rules text
+                  Information text
                   <textarea
                     name="body"
-                    placeholder="Enter the complete official rules..."
+                    placeholder="Enter the information shown to visitors..."
                     required
                   />
                 </label>
@@ -322,18 +322,18 @@ function stringParam(value: string | string[] | undefined) {
 }
 
 function getFeedback(params: SearchParams, queryError?: string) {
-  if (queryError) return `Could not load rules: ${queryError}`;
-  if (params.created === "1") return "Ruleset draft created.";
-  if (params.updated === "1") return "Ruleset saved.";
-  if (params.statusUpdated === "1") return "Ruleset status updated.";
-  if (params.pdfUploaded === "1") return "Rules PDF uploaded successfully.";
-  if (params.pdfRemoved === "1") return "Rules PDF removed.";
+  if (queryError) return `Could not load information: ${queryError}`;
+  if (params.created === "1") return "Information draft created.";
+  if (params.updated === "1") return "Information saved.";
+  if (params.statusUpdated === "1") return "Information status updated.";
+  if (params.pdfUploaded === "1") return "File uploaded successfully.";
+  if (params.pdfRemoved === "1") return "File removed.";
   if (params.error === "invalid-ruleset") return "Please enter a title and at least 10 characters of rules text.";
   if (params.error === "invalid-status") return "The requested ruleset status is invalid.";
-  if (params.error === "select-pdf") return "Please select a PDF file.";
-  if (params.error === "pdf-type") return "Only PDF files are supported.";
-  if (params.error === "pdf-too-large") return "The PDF must be 4 MB or smaller.";
-  if (params.error === "pdf-not-found") return "This ruleset has no PDF to remove.";
+  if (params.error === "select-file") return "Please select a file.";
+  if (params.error === "file-type") return "Use PDF, PNG, JPG, WebP, TXT, DOC or DOCX.";
+  if (params.error === "file-too-large") return "The file must be 10 MB or smaller.";
+  if (params.error === "pdf-not-found") return "This information entry has no file to remove.";
   if (typeof params.error === "string") return `Action failed: ${params.error}`;
   return null;
 }
