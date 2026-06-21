@@ -105,9 +105,13 @@ function scopedRecords(value: unknown[]) {
 
 function normalizeSupabaseData(raw: Record<SupabaseTable, unknown[]>): CmsData {
   const pageRows = scopedRecords(raw.pages);
-  const pages = (pageRows.length ? pageRows : (defaultCmsData.pages as unknown as RecordValue[])).map(
-    (page) => ({ ...page, blocks: [] })
-  );
+  const pages = (
+    pageRows.length ? pageRows : (defaultCmsData.pages as unknown as RecordValue[])
+  ).map((page) => ({
+    ...page,
+    id: String(page.id),
+    blocks: [] as CmsData["pages"][number]["blocks"]
+  }));
   const blocks = camelize(
     raw.page_blocks.length ? raw.page_blocks : defaultCmsData.pages.flatMap((page) =>
       page.blocks.map((block) => ({ ...block, pageId: page.id }))
