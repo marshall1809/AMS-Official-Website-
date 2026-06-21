@@ -71,6 +71,12 @@ export function PublicBracketPage({
   const rounds = Array.from(
     new Set(matches.map((match) => match.roundLabel ?? "Round"))
   ).sort(roundOrder);
+  const matchesByRound = rounds.map((round) =>
+    matches
+      .filter((match) => (match.roundLabel ?? "Round") === round)
+      .sort((a, b) => (a.bracketPosition ?? 0) - (b.bracketPosition ?? 0))
+  );
+  const bracketSlots = Math.max(1, ...matchesByRound.map((roundMatches) => roundMatches.length));
   const scheduleHref = season ? `/seasons/${season.slug}/schedule` : "/schedule";
 
   return (
@@ -86,7 +92,7 @@ export function PublicBracketPage({
         title="Bracket"
       />
 
-      <section className="container content-section">
+      <section className="container content-section public-bracket-section">
         <div className="competition-toolbar">
           <span>{matches.length} matches across {rounds.length} rounds</span>
           <Link className="button secondary" href={scheduleHref}>
@@ -95,26 +101,55 @@ export function PublicBracketPage({
         </div>
 
         {matches.length ? (
-          <div className="public-bracket">
-            {rounds.map((round) => (
-              <section className="public-bracket-round" key={round}>
-                <h2>{round}</h2>
-                <div>
-                  {matches
-                    .filter((match) => (match.roundLabel ?? "Round") === round)
-                    .sort((a, b) => (a.bracketPosition ?? 0) - (b.bracketPosition ?? 0))
-                    .map((match) => (
-                      <BracketMatch
-                        data={data}
-                        match={match}
-                        scheduleHref={scheduleHref}
-                        season={season}
-                        key={match.id}
-                      />
-                    ))}
-                </div>
-              </section>
-            ))}
+          <div className="public-bracket-shell">
+            <div
+              className="public-bracket"
+              style={{ "--bracket-slots": bracketSlots } as React.CSSProperties}
+            >
+              {rounds.map((round, roundIndex) => {
+                const roundMatches = matchesByRound[roundIndex];
+                const slotSpan = Math.max(
+                  1,
+                  Math.floor(bracketSlots / Math.max(1, roundMatches.length))
+                );
+
+                return (
+                  <section
+                    className={[
+                      "public-bracket-round",
+                      roundIndex === 0 ? "is-opening-round" : "",
+                      roundIndex === rounds.length - 1 ? "is-final-round" : ""
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    key={round}
+                  >
+                    <h2>
+                      <span>{round}</span>
+                      <small>{roundMatches.length} {roundMatches.length === 1 ? "match" : "matches"}</small>
+                    </h2>
+                    <div className="public-bracket-round__matches">
+                      {roundMatches.map((match, matchIndex) => (
+                        <div
+                          className="public-bracket-slot"
+                          key={match.id}
+                          style={{
+                            gridRow: `${matchIndex * slotSpan + 1} / span ${slotSpan}`
+                          }}
+                        >
+                          <BracketMatch
+                            data={data}
+                            match={match}
+                            scheduleHref={scheduleHref}
+                            season={season}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
           </div>
         ) : (
           <CompetitionEmpty text="The knockout bracket has not been generated yet." />
