@@ -1290,7 +1290,7 @@ textarea {
 
 .public-schedule-match > header small,
 .public-bracket-match header,
-.public-bracket-match > a {
+.public-bracket-match__timing {
   color: var(--color-text-muted);
   font-family: var(--font-body);
   font-size: 0.72rem;
@@ -1589,7 +1589,7 @@ textarea {
   text-align: right;
 }
 
-.public-bracket-match > a {
+.public-bracket-match__timing {
   display: block;
   overflow: hidden;
   padding-top: 1px;
@@ -1885,7 +1885,7 @@ textarea {
 
   .public-bracket-match > header span,
   .public-bracket-team .public-match-team__name,
-  .public-bracket-match > a {
+  .public-bracket-match__timing {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
