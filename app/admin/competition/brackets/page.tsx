@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { AdminAccessBlocked } from "@/components/admin/admin-frame";
 import { AdminPageHeader } from "@/components/admin/admin-page";
 import adminStyles from "@/components/admin/admin-shell.module.css";
@@ -230,13 +229,6 @@ export default async function BracketManagerPage({
                         </div>
                       );
                     })}
-
-                    <Link
-                      className={bracketStyles.scheduleLink}
-                      href={`/admin/competition/schedule#match-${match.id}`}
-                    >
-                      Open this match in Schedule
-                    </Link>
 
                     {canEditMatchup ? (
                       <details className={bracketStyles.matchupEditor}>
