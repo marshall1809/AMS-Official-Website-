@@ -1,3 +1,4 @@
+import { PublicHomepage } from "@/components/cms/public-homepage";
 import { PageRenderer } from "@/components/cms/page-renderer";
 import { SiteShell } from "@/components/cms/site-shell";
 import { getCmsData } from "@/lib/cms/repository";
@@ -12,6 +13,11 @@ export default async function DynamicPage({ params }: DynamicPageProps) {
   const resolvedParams = await params;
   const data = await getCmsData();
   const path = normalizePath(resolvedParams.path);
+
+  if (path === "/") {
+    return <PublicHomepage data={data} />;
+  }
+
   const resolved = resolveRoute(data, path);
 
   if (resolved.kind === "gone") {
