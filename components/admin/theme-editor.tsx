@@ -9,6 +9,7 @@ const colorFields = [
   ["colorBg", "Background"],
   ["colorBgSoft", "Soft background"],
   ["colorPanel", "Cards"],
+  ["colorPanelStrong", "Strong cards"],
   ["colorText", "Primary text"],
   ["colorTextMuted", "Muted text"],
   ["colorTextSoft", "Soft text"],
@@ -18,6 +19,8 @@ const colorFields = [
   ["colorSuccess", "Success"],
   ["colorDanger", "Danger"]
 ] as const;
+
+type ColorKey = (typeof colorFields)[number][0];
 
 export function ThemeEditor({
   mode,
@@ -30,11 +33,11 @@ export function ThemeEditor({
   themeId?: string;
   initialTokens: ThemeTokens;
 }) {
-  const [colors, setColors] = useState(() =>
-    Object.fromEntries(colorFields.map(([key]) => [key, initialTokens[key]])) as Record<
-      (typeof colorFields)[number][0],
-      string
-    >
+  const [colors, setColors] = useState(
+    () =>
+      Object.fromEntries(
+        colorFields.map(([key]) => [key, normalizeHex(initialTokens[key])])
+      ) as Record<ColorKey, string>
   );
   const [radiusCard, setRadiusCard] = useState(parsePixels(initialTokens.radiusCard, 6));
   const [radiusButton, setRadiusButton] = useState(parsePixels(initialTokens.radiusButton, 6));
@@ -43,16 +46,20 @@ export function ThemeEditor({
   );
 
   const previewStyle = {
-    "--preview-bg": colors.colorBg,
-    "--preview-panel": colors.colorPanel,
-    "--preview-text": colors.colorText,
-    "--preview-muted": colors.colorTextMuted,
-    "--preview-accent": colors.colorAccent,
-    "--preview-border": colors.colorBorder,
+    "--preview-bg": validHex(colors.colorBg),
+    "--preview-panel": validHex(colors.colorPanel),
+    "--preview-text": validHex(colors.colorText),
+    "--preview-muted": validHex(colors.colorTextMuted),
+    "--preview-accent": validHex(colors.colorAccent),
+    "--preview-border": validHex(colors.colorBorder),
     "--preview-card-radius": `${radiusCard}px`,
     "--preview-button-radius": `${radiusButton}px`,
     "--preview-transform": buttonTransform
   } as CSSProperties;
+
+  function updateColor(key: ColorKey, value: string) {
+    setColors((current) => ({ ...current, [key]: value.toUpperCase() }));
+  }
 
   return (
     <div className={styles.editorGrid}>
@@ -66,7 +73,9 @@ export function ThemeEditor({
             <small>{mode === "global" ? "Platform" : "Season override"}</small>
             <h2>{mode === "global" ? "Global theme" : "Season theme"}</h2>
           </div>
-          <button className={styles.primary} type="submit">Save theme</button>
+          <button className={styles.primary} type="submit">
+            Save and publish
+          </button>
         </header>
 
         <div className={styles.colorGrid}>
@@ -75,14 +84,23 @@ export function ThemeEditor({
               <span>{label}</span>
               <span className={styles.colorControl}>
                 <input
-                  name={key}
-                  onChange={(event) =>
-                    setColors((current) => ({ ...current, [key]: event.target.value }))
-                  }
+                  aria-label={`${label} color picker`}
+                  onChange={(event) => updateColor(key, event.target.value)}
                   type="color"
+                  value={validHex(colors[key])}
+                />
+                <input
+                  aria-label={`${label} hex value`}
+                  className={styles.hexInput}
+                  maxLength={7}
+                  name={key}
+                  onChange={(event) => updateColor(key, event.target.value)}
+                  pattern="^#[0-9A-Fa-f]{6}$"
+                  required
+                  spellCheck={false}
+                  type="text"
                   value={colors[key]}
                 />
-                <code>{colors[key]}</code>
               </span>
             </label>
           ))}
@@ -148,6 +166,28 @@ export function ThemeEditor({
       </section>
     </div>
   );
+}
+
+function validHex(value: string) {
+  return /^#[0-9a-f]{6}$/i.test(value) ? value : "#000000";
+}
+
+function normalizeHex(value: string) {
+  if (/^#[0-9a-f]{6}$/i.test(value)) return value.toUpperCase();
+
+  const shortHex = value.match(/^#([0-9a-f])([0-9a-f])([0-9a-f])$/i);
+  if (shortHex) {
+    return `#${shortHex[1]}${shortHex[1]}${shortHex[2]}${shortHex[2]}${shortHex[3]}${shortHex[3]}`.toUpperCase();
+  }
+
+  const rgb = value.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (rgb) {
+    return `#${[rgb[1], rgb[2], rgb[3]]
+      .map((part) => Math.max(0, Math.min(255, Number(part))).toString(16).padStart(2, "0"))
+      .join("")}`.toUpperCase();
+  }
+
+  return "#000000";
 }
 
 function parsePixels(value: string, fallback: number) {
