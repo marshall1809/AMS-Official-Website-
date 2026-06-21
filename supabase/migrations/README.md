@@ -23,6 +23,7 @@ Run these files in order on a fresh Supabase project.
 19. `019_mvp_rules_pdf_storage.sql`
 20. `020_public_team_logo_read.sql`
 21. `021_mvp_theme_management.sql`
+22. `022_mvp_info_documents.sql`
 
 ## Important
 
@@ -45,3 +46,5 @@ Before running `014_seed_defaults.sql`, optionally replace the commented Super A
 `020_public_team_logo_read.sql` ensures that logo assets used by teams in public Seasons can be read by the anonymous public website.
 
 `021_mvp_theme_management.sql` adds compatible Theme Manager permissions and public reads for global and Season themes.
+
+`022_mvp_info_documents.sql` expands the former Rules PDF upload into public Season Info documents, including embedded PDFs and downloadable files.
