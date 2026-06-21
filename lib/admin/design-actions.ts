@@ -91,15 +91,29 @@ export async function saveThemeAction(formData: FormData) {
     }
   }
 
-  const { error } = await supabase
+  const { data: savedTheme, error } = await supabase
     .from("themes")
     .update({
       tokens: { ...existingTokens, ...tokenOverrides },
+      is_active: true,
       updated_at: new Date().toISOString()
     })
-    .eq("id", themeId);
+    .eq("id", themeId)
+    .select("id")
+    .single();
 
-  if (error) fail(THEMES_ROUTE, error.message);
+  if (error || !savedTheme) {
+    fail(THEMES_ROUTE, error?.message ?? "theme-save-failed");
+  }
+
+  if (mode === "season") {
+    const { error: seasonError } = await supabase
+      .from("seasons")
+      .update({ theme_id: themeId, updated_at: new Date().toISOString() })
+      .eq("id", seasonId);
+
+    if (seasonError) fail(THEMES_ROUTE, seasonError.message);
+  }
 
   refreshPublicSite();
   redirect(
