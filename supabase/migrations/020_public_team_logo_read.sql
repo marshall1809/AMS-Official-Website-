@@ -20,7 +20,7 @@ as $$
       on season.id = participation.season_id
     where version.logo_asset_id = asset_id_input
       and team.deleted_at is null
-      and team.status::text in ('published', 'archived')
+      and coalesce(to_jsonb(team)->>'status', 'published') in ('published', 'archived')
       and participation.status::text <> 'archived'
       and season.deleted_at is null
       and season.status::text in ('ready', 'active', 'finished', 'archived')
