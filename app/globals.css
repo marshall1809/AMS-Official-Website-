@@ -1891,3 +1891,36 @@ textarea {
     white-space: nowrap;
   }
 }
+
+
+.info-image-document > img {
+  display: block;
+  width: 100%;
+  max-height: 1100px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-bg);
+  object-fit: contain;
+}
+
+.info-file-download {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 32px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 28px;
+}
+
+.info-file-download h3 {
+  margin: 2px 0 0;
+  color: var(--color-text);
+}
+
+@media (max-width: 640px) {
+  .info-file-download {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
