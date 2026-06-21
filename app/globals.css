@@ -1600,6 +1600,145 @@ textarea {
   white-space: nowrap;
 }
 
+.public-bracket-shell--mirrored {
+  padding: 0;
+}
+
+.public-bracket-mirrored {
+  display: grid;
+  min-width: 1040px;
+  grid-template-columns:
+    minmax(205px, 1fr)
+    minmax(170px, 0.82fr)
+    minmax(205px, 0.92fr)
+    minmax(170px, 0.82fr)
+    minmax(205px, 1fr);
+  gap: 24px;
+  padding: 18px 18px 22px;
+}
+
+.public-bracket-mirror-column {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  grid-template-rows: 38px 320px;
+}
+
+.public-bracket-mirror-column > h2 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-accent);
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.public-bracket-mirror-column > h2 small {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+  font-size: 0.54rem;
+  letter-spacing: 0.04em;
+}
+
+.public-bracket-mirror-stack,
+.public-bracket-mirror-center {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.public-bracket-mirror-stack {
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.public-bracket-mirror-center {
+  align-items: center;
+}
+
+.public-bracket-mirror-column .public-bracket-match {
+  width: 100%;
+}
+
+.public-bracket-mirror-column .public-bracket-match::before,
+.public-bracket-mirror-column .public-bracket-match::after,
+.public-bracket-mirror-stack::before,
+.public-bracket-mirror-stack::after {
+  position: absolute;
+  border-color: color-mix(in srgb, var(--color-accent) 78%, var(--color-border));
+  content: "";
+  pointer-events: none;
+}
+
+.mirror-quarter.mirror-left .public-bracket-match::after,
+.mirror-semi.mirror-left .public-bracket-match::after,
+.mirror-final .public-bracket-match::after {
+  top: 50%;
+  right: -12px;
+  width: 12px;
+  border-top: 2px solid color-mix(in srgb, var(--color-accent) 78%, var(--color-border));
+}
+
+.mirror-quarter.mirror-right .public-bracket-match::before,
+.mirror-semi.mirror-right .public-bracket-match::before,
+.mirror-final .public-bracket-match::before {
+  top: 50%;
+  left: -12px;
+  width: 12px;
+  border-top: 2px solid color-mix(in srgb, var(--color-accent) 78%, var(--color-border));
+}
+
+.mirror-semi.mirror-left .public-bracket-match::before {
+  top: 50%;
+  left: -12px;
+  width: 12px;
+  border-top: 2px solid color-mix(in srgb, var(--color-accent) 78%, var(--color-border));
+}
+
+.mirror-semi.mirror-right .public-bracket-match::after {
+  top: 50%;
+  right: -12px;
+  width: 12px;
+  border-top: 2px solid color-mix(in srgb, var(--color-accent) 78%, var(--color-border));
+}
+
+.mirror-quarter.mirror-left .public-bracket-mirror-stack::after {
+  top: 25%;
+  right: -12px;
+  bottom: 25%;
+  border-right: 2px solid color-mix(in srgb, var(--color-accent) 78%, var(--color-border));
+}
+
+.mirror-quarter.mirror-right .public-bracket-mirror-stack::before {
+  top: 25%;
+  bottom: 25%;
+  left: -12px;
+  border-left: 2px solid color-mix(in srgb, var(--color-accent) 78%, var(--color-border));
+}
+
+.mirror-final {
+  z-index: 1;
+}
+
+.public-bracket-final-line {
+  position: absolute;
+  top: 72px;
+  bottom: 34px;
+  left: 50%;
+  z-index: 0;
+  border-left: 2px solid color-mix(in srgb, var(--color-accent) 84%, var(--color-border));
+  pointer-events: none;
+}
+
+.mirror-final .public-bracket-mirror-center {
+  z-index: 1;
+}
+
 @media (max-width: 900px) {
   .public-bracket {
     min-width: max-content;
