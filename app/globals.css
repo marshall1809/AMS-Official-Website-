@@ -51,11 +51,11 @@ textarea {
 .theme-root {
   min-height: 100vh;
   background:
-    linear-gradient(90deg, rgba(201, 168, 76, 0.08) 1px, transparent 1px),
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    radial-gradient(circle at 20% 5%, rgba(201, 168, 76, 0.17), transparent 24rem),
-    radial-gradient(circle at 82% 22%, rgba(35, 70, 140, 0.32), transparent 30rem),
-    linear-gradient(180deg, var(--color-bg-soft) 0%, var(--color-bg) 48%, #030812 100%);
+    linear-gradient(90deg, var(--color-border) 1px, transparent 1px),
+    linear-gradient(var(--color-border) 1px, transparent 1px),
+    radial-gradient(circle at 20% 5%, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 24rem),
+    radial-gradient(circle at 82% 22%, color-mix(in srgb, var(--color-panel-strong) 55%, transparent), transparent 30rem),
+    linear-gradient(180deg, var(--color-bg-soft) 0%, var(--color-bg) 100%);
   background-size: 46px 46px, 46px 46px, auto, auto, auto;
   color: var(--color-text);
 }
@@ -80,7 +80,7 @@ textarea {
 .admin-hero {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
-  background: linear-gradient(180deg, rgba(15, 36, 78, 0.72), rgba(7, 18, 42, 0.84));
+  background: linear-gradient(180deg, var(--color-panel), var(--color-panel-strong));
   box-shadow: var(--shadow-panel);
 }
 
@@ -89,7 +89,7 @@ textarea {
   top: 0;
   z-index: 20;
   border-bottom: 1px solid var(--color-border);
-  background: rgba(5, 11, 22, 0.88);
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
   backdrop-filter: blur(16px);
 }
 
@@ -186,7 +186,7 @@ textarea {
 
 .announcement {
   border-bottom: 1px solid var(--color-border);
-  background: rgba(6, 16, 38, 0.82);
+  background: color-mix(in srgb, var(--color-panel-strong) 82%, transparent);
   color: var(--color-text-soft);
   font-family: var(--font-body);
   font-size: 0.86rem;
@@ -279,6 +279,10 @@ textarea {
   color: var(--color-accent);
 }
 
+.button:not(.secondary):hover {
+  background: var(--color-accent-strong);
+}
+
 .content-section {
   padding: 76px 0 0;
 }
@@ -322,7 +326,7 @@ textarea {
 
 .stat-band {
   border-bottom: 1px solid var(--color-border);
-  background: rgba(6, 16, 38, 0.76);
+  background: color-mix(in srgb, var(--color-panel-strong) 76%, transparent);
 }
 
 .stat-band__grid {
@@ -495,7 +499,7 @@ textarea {
   overflow-x: auto;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
-  background: rgba(3, 8, 18, 0.42);
+  background: color-mix(in srgb, var(--color-bg) 72%, transparent);
   padding: 22px;
 }
 
@@ -540,7 +544,7 @@ textarea {
   margin-top: 76px;
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
-  background: rgba(6, 16, 38, 0.82);
+  background: color-mix(in srgb, var(--color-panel-strong) 82%, transparent);
 }
 
 .sponsor-band__inner {
@@ -593,7 +597,7 @@ textarea {
 .site-footer {
   margin-top: 76px;
   border-top: 1px solid var(--color-border);
-  background: rgba(3, 8, 18, 0.88);
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
   padding: 36px 0;
 }
 
@@ -892,7 +896,7 @@ textarea {
 
 .public-page-hero {
   border-bottom: 1px solid var(--color-border);
-  background: rgba(4, 12, 28, 0.58);
+  background: color-mix(in srgb, var(--color-bg-soft) 72%, transparent);
   padding: 72px 0 58px;
 }
 
@@ -1085,7 +1089,7 @@ textarea {
 
 .team-profile-hero {
   border-bottom: 1px solid var(--color-border);
-  background: rgba(4, 12, 28, 0.58);
+  background: color-mix(in srgb, var(--color-bg-soft) 72%, transparent);
   padding: 64px 0;
 }
 
